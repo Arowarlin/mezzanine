@@ -84,10 +84,10 @@ export function ContactPage() {
               </span>
               <div>
                 <span className="block text-[0.62rem] font-bold uppercase tracking-[0.16em] text-ink/40">Hours</span>
-                <p className="mt-1 text-sm font-semibold">Pending confirmation</p>
+                <p className="mt-1 text-sm font-semibold">Thu–Mon, 12–8pm</p>
                 <p className="mt-1 text-xs leading-relaxed text-ink/55">
-                  The official site shows both “closed Tuesday &amp; Wednesday” and “7 days a week, 11am–9pm”.
-                  Call before you drive.
+                  Closed Tuesday &amp; Wednesday. The 2026 season ended October 31; call before you drive or to
+                  confirm the 2027 reopening.
                 </p>
               </div>
             </div>

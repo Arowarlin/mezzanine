@@ -22,12 +22,12 @@ export const EAT_TABS = [
   {
     id: 'lunch' as const,
     label: 'Lunch',
-    blurb: 'Midday plates on the roof. Item names come from recent public menus.',
+    blurb: 'Midday plates on the roof. Sandwiches are served with fresh watermelon or fries.',
   },
   {
     id: 'dinner' as const,
     label: 'Dinner',
-    blurb: 'The evening menu. Item names come from recent public menus.',
+    blurb: 'The evening menu, from shared appetizers to plates for the table.',
   },
 ]
 

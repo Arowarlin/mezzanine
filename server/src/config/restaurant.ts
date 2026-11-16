@@ -24,14 +24,14 @@ export const restaurantDefaults = {
   currency: 'USD',
   delivery_fee_cents: '0',
   min_order_cents: '0',
-  open_time: '11:00',
-  close_time: '21:00',
+  open_time: '12:00',
+  close_time: '20:00',
   slot_minutes: '30',
   seats_per_slot: '40',
-  /** Dias cerrados, 0 = domingo ... 6 = sabado. Pendiente de confirmar. */
+  /** Dias cerrados, 0 = domingo ... 6 = sabado. Confirmado en Instagram: martes y miercoles. */
   closed_days: '2,3',
   hours_note:
-    'Hours are pending confirmation with the restaurant. The official site currently shows both "closed Tuesday & Wednesday" and "7 days a week, 11am–9pm".',
+    'Closed Tuesday & Wednesday · Thursday–Monday, 12–8pm. The 2026 season ended October 31; confirm reopening for 2027.',
   demo_mode: 'true',
   demo_notice:
     'Unofficial redesign proposal — local demo only. No real reservations, orders, payments, or emails are processed.',

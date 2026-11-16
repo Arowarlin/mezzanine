@@ -70,8 +70,8 @@ export function OrderPage() {
             Pre-order, <em className="text-gold">on paper</em>.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-cream/65">
-            A working demonstration of the ordering flow using sample drink prices. Nothing is sent to the kitchen
-            and no payment is taken.
+            A working demonstration of the ordering flow with the published menu prices. Nothing is sent to the
+            kitchen and no payment is taken.
           </p>
         </div>
       </section>
@@ -92,8 +92,8 @@ export function OrderPage() {
               database. No ticket was printed, no message was sent, and no payment was processed.
             </div>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link to="/drink" className="btn-primary">
-                Back to the drinks
+              <Link to="/eat" className="btn-primary">
+                Back to the menu
               </Link>
               <button type="button" className="btn-ghost text-ink/70" onClick={() => setResult(null)}>
                 Start another order
@@ -105,9 +105,9 @@ export function OrderPage() {
             <div>
               <div className="flex items-center justify-between gap-4">
                 <h2 className="text-3xl">Your demo order</h2>
-                <Link to="/drink" className="inline-flex items-center gap-1.5 text-[0.66rem] font-bold uppercase tracking-[0.14em] text-clay">
+                <Link to="/eat" className="inline-flex items-center gap-1.5 text-[0.66rem] font-bold uppercase tracking-[0.14em] text-clay">
                   <ArrowLeft className="h-3.5 w-3.5" />
-                  Add drinks
+                  Add more
                 </Link>
               </div>
 
@@ -116,10 +116,10 @@ export function OrderPage() {
                   <ShoppingBag className="mx-auto h-9 w-9 text-ink/25" />
                   <p className="mt-4 font-display text-2xl">Nothing in the cart yet.</p>
                   <p className="mt-2 text-sm text-ink/55">
-                    Only drinks carry sample prices, so only drinks can be added in this demo.
+                    Add lunch or dinner plates from the menu to try the demo.
                   </p>
-                  <Link to="/drink" className="btn-primary mt-6">
-                    Browse cocktails, beer &amp; wine
+                  <Link to="/eat" className="btn-primary mt-6">
+                    Browse lunch &amp; dinner
                   </Link>
                 </div>
               ) : (
@@ -136,7 +136,7 @@ export function OrderPage() {
                         <div className="min-w-0">
                           <p className="font-display text-xl leading-tight">{item.name}</p>
                           <p className="mt-0.5 text-xs text-ink/45">
-                            {formatMoney(item.priceCents, currency)} · sample price
+                            {formatMoney(item.priceCents, currency)}
                           </p>
                         </div>
                         <div className="flex items-center gap-4">
@@ -271,7 +271,7 @@ export function OrderPage() {
                   </div>
                 </dl>
                 <p className="mt-3 text-[0.64rem] uppercase tracking-[0.1em] text-ink/35">
-                  Sample pricing · no payment
+                  Cash prices · no payment
                 </p>
               </div>
 
@@ -279,8 +279,8 @@ export function OrderPage() {
                 <p className="flex items-start gap-2">
                   <Info className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>
-                    <strong className="font-semibold">Demo only.</strong> Food items are excluded because their prices
-                    are pending confirmation. Nothing is sent to Mezzanine and no card is processed.
+                    <strong className="font-semibold">Demo only.</strong> Nothing is sent to Mezzanine and no card is
+                    processed.
                   </span>
                 </p>
               </div>

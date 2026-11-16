@@ -15,8 +15,8 @@ export function AboutPage() {
     <>
       <section className="relative overflow-hidden bg-ink pb-20 pt-40 text-cream sm:pb-24 sm:pt-48">
         <SmartImage
-          src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1800&q=80"
-          alt="A table set for dinner"
+          src="/photos/venue-fall-table.jpg"
+          alt="A rooftop table among the autumn trees"
           className="absolute inset-0 h-full w-full"
           imgClassName="h-full w-full object-cover opacity-35"
           eager
@@ -60,8 +60,8 @@ export function AboutPage() {
               Door County rosé to Mendoza malbec.
             </p>
             <p>
-              The kitchen serves lunch and dinner. This proposal does not invent dishes, recipes, or prices: item
-              names come from recent public menus, and anything unconfirmed is labeled as pending.
+              The kitchen serves lunch and dinner. Dishes and prices on this site follow the restaurant's published
+              2026 menus; anything unconfirmed is labeled as pending.
             </p>
           </div>
         </Reveal>
@@ -70,22 +70,22 @@ export function AboutPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="overflow-hidden rounded-[1.75rem] sm:mt-10">
               <SmartImage
-                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80"
-                alt="Dining room"
+                src="/photos/venue-entrance-800.jpg"
+                alt="The Mezzanine entrance on Horseshoe Bay Road"
                 className="aspect-[3/4] w-full"
                 imgClassName="h-full w-full object-cover"
               />
             </div>
             <div className="overflow-hidden rounded-[1.75rem]">
               <SmartImage
-                src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=900&q=80"
-                alt="Behind the bar"
+                src="/photos/drinks-citrus-cocktail-800.jpg"
+                alt="A citrus cocktail on the rooftop"
                 className="aspect-[3/4] w-full"
                 imgClassName="h-full w-full object-cover"
               />
             </div>
             <p className="col-span-full text-[0.62rem] uppercase tracking-[0.16em] text-ink/35">
-              Illustrative photography for this proposal
+              Photos · @mezzaninerooftop
             </p>
           </div>
         </Reveal>

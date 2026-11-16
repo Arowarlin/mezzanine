@@ -113,8 +113,8 @@ export function ReservationsPage() {
     <>
       <section className="relative overflow-hidden bg-ink pb-14 pt-36 text-cream sm:pb-16 sm:pt-44">
         <SmartImage
-          src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1800&q=80"
-          alt="A table set for dinner"
+          src="/photos/venue-sunset-bay.jpg"
+          alt="Sunset over Horseshoe Bay from the rooftop"
           className="absolute inset-0 h-full w-full"
           imgClassName="h-full w-full object-cover opacity-30"
           eager
@@ -219,8 +219,7 @@ export function ReservationsPage() {
                   </div>
                 ) : closed ? (
                   <div className="rounded-xl border border-clay/25 bg-clay/5 p-4 text-sm text-clay">
-                    The calendar is marked closed on this date. The restaurant&apos;s published hours conflict, so
-                    this schedule is pending confirmation.
+                    The calendar is marked closed on this date. Mezzanine is closed Tuesday &amp; Wednesday.
                   </div>
                 ) : slots.length === 0 ? (
                   <div className="rounded-xl border border-line/70 bg-cream/60 p-4 text-sm text-ink/55">
@@ -328,8 +327,8 @@ export function ReservationsPage() {
         <aside className="space-y-5">
           <div className="overflow-hidden rounded-[2rem] border border-line/70 bg-white/60">
             <SmartImage
-              src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=80"
-              alt="Evening service"
+              src="/photos/venue-rooftop-deck-800.jpg"
+              alt="The rooftop deck at Mezzanine"
               className="aspect-[4/3] w-full"
               imgClassName="h-full w-full object-cover"
             />
@@ -338,8 +337,8 @@ export function ReservationsPage() {
               <ul className="mt-4 space-y-3 text-sm text-ink/60">
                 <li className="flex gap-2.5">
                   <Clock className="mt-0.5 h-4 w-4 shrink-0 text-clay" />
-                  Hours are pending confirmation. The official site shows both “closed Tuesday &amp; Wednesday” and
-                  “7 days a week, 11am–9pm”.
+                  Closed Tuesday &amp; Wednesday · Thursday–Monday, 12–8pm. The 2026 season ended October 31;
+                  confirm reopening for 2027.
                 </li>
                 <li className="flex gap-2.5">
                   <Phone className="mt-0.5 h-4 w-4 shrink-0 text-clay" />

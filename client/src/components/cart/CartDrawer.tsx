@@ -58,10 +58,10 @@ export function CartDrawer() {
               <ShoppingBag className="h-7 w-7" />
             </span>
             <p className="text-sm leading-relaxed text-ink/60">
-              Nothing added yet. Drinks carry sample prices in this demo, so they are the only items you can pre-order.
+              Nothing added yet. Add lunch or dinner plates from the menu to try the demo pre-order.
             </p>
-            <Link to="/drink" onClick={closeCart} className="btn-primary">
-              Browse the drinks
+            <Link to="/eat" onClick={closeCart} className="btn-primary">
+              Browse the menu
             </Link>
           </div>
         ) : (
@@ -80,7 +80,7 @@ export function CartDrawer() {
                       <div>
                         <p className="text-sm font-semibold leading-snug">{item.name}</p>
                         <p className="mt-0.5 text-xs text-ink/50">
-                          {formatMoney(item.priceCents, currency)} each · sample
+                          {formatMoney(item.priceCents, currency)} each
                         </p>
                       </div>
                       <button

@@ -40,7 +40,7 @@ export function AdminLoginPage() {
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_0.95fr]">
       <div className="relative hidden overflow-hidden bg-ink lg:block">
         <SmartImage
-          src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=80"
+          src="/photos/venue-sunset-bay.jpg"
           alt="Mesa servida en Mezzanine"
           className="absolute inset-0 h-full w-full"
           imgClassName="h-full w-full object-cover opacity-45"

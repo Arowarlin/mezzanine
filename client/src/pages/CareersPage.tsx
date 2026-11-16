@@ -43,8 +43,8 @@ export function CareersPage() {
     <>
       <section className="relative overflow-hidden bg-ink pb-16 pt-36 text-cream sm:pb-20 sm:pt-44">
         <SmartImage
-          src="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1800&q=80"
-          alt="The bar"
+          src="/photos/venue-rooftop-deck.jpg"
+          alt="The rooftop deck at Mezzanine"
           className="absolute inset-0 h-full w-full"
           imgClassName="h-full w-full object-cover opacity-30"
           eager
@@ -99,19 +99,19 @@ export function CareersPage() {
         <Reveal delay={90}>
           <div className="grid gap-4 sm:grid-cols-2">
             <SmartImage
-              src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
-              alt="Dining room"
+              src="/photos/venue-entrance-800.jpg"
+              alt="The Mezzanine entrance"
               className="aspect-[3/4] w-full overflow-hidden rounded-[1.75rem] sm:mt-8"
               imgClassName="h-full w-full object-cover"
             />
             <SmartImage
-              src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80"
-              alt="Behind the bar"
+              src="/photos/drinks-basil-cocktail-800.jpg"
+              alt="A basil cocktail at golden hour"
               className="aspect-[3/4] w-full overflow-hidden rounded-[1.75rem]"
               imgClassName="h-full w-full object-cover"
             />
             <p className="col-span-full text-[0.62rem] uppercase tracking-[0.16em] text-ink/35">
-              Illustrative photography for this proposal
+              Photos · @mezzaninerooftop
             </p>
           </div>
         </Reveal>

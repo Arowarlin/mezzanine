@@ -1,16 +1,45 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Info, UtensilsCrossed } from 'lucide-react'
+import { ArrowRight, Check, Info, Moon, Plus, UtensilsCrossed } from 'lucide-react'
 import { api, errorMessage } from '../lib/api'
 import type { Category, MenuType, Product } from '../lib/types'
 import { EAT_TABS } from '../lib/site'
 import { formatMoney } from '../lib/format'
 import { useSettings } from '../context/SettingsContext'
+import { useCart } from '../context/CartContext'
 import { PageLoader } from '../components/ui/Spinner'
 import { Reveal } from '../components/ui/Reveal'
 import { SmartImage } from '../components/ui/SmartImage'
 
 type EatMenu = Extract<MenuType, 'lunch' | 'dinner'>
+
+const FOOD_NOTES = {
+  lateNight: 'Late night menu available after 9pm',
+  cash: 'Menu prices reflect discounted cash payment price.',
+  raw: '*Consuming raw or undercooked meats, poultry, seafood, shellfish or eggs may increase your risk of foodborne illness.',
+}
+
+function AddButton({ product }: { product: Product }) {
+  const { addItem } = useCart()
+  const [added, setAdded] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        addItem(product)
+        setAdded(true)
+        window.setTimeout(() => setAdded(false), 1400)
+      }}
+      aria-label={`Add ${product.name} to the demo order`}
+      className={`inline-flex h-8 items-center gap-1 rounded-full px-3 text-[0.6rem] font-bold uppercase tracking-[0.12em] transition-colors ${
+        added ? 'bg-moss text-cream' : 'border border-line text-ink/60 hover:border-forest hover:bg-forest hover:text-cream'
+      }`}
+    >
+      {added ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+      {added ? 'Added' : 'Add'}
+    </button>
+  )
+}
 
 export function EatPage() {
   const { currency } = useSettings()
@@ -68,8 +97,8 @@ export function EatPage() {
     <>
       <section className="relative overflow-hidden bg-ink pb-14 pt-36 text-cream sm:pb-16 sm:pt-44">
         <SmartImage
-          src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1800&q=80"
-          alt="Plates for the table"
+          src="/photos/food-baja-ahi-tuna.jpg"
+          alt="Baja ahi tuna at Mezzanine"
           className="absolute inset-0 h-full w-full"
           imgClassName="h-full w-full object-cover opacity-30"
           eager
@@ -81,8 +110,8 @@ export function EatPage() {
             Eat <em className="text-gold">upstairs</em>.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-cream/70">
-            Lunch and dinner at Mezzanine. Item names come from recent public menus; descriptions and prices are
-            pending confirmation from the restaurant.
+            Lunch and dinner at Mezzanine — Lake Michigan whitefish, seared ahi tuna and Door County cherries, served
+            three stories above Horseshoe Bay.
           </p>
 
           <div className="mt-8 inline-flex rounded-full border border-cream/20 bg-cream/5 p-1">
@@ -106,7 +135,7 @@ export function EatPage() {
         <div className="container-page flex flex-wrap items-center justify-between gap-3 py-3 text-[0.68rem] text-ink/55">
           <span className="flex items-center gap-2">
             <Info className="h-3.5 w-3.5 text-clay" />
-            {activeTab.blurb} Prices are pending confirmation and are not charged anywhere in this demo.
+            {activeTab.blurb}
           </span>
           <Link to="/drink" className="inline-flex items-center gap-1.5 font-semibold uppercase tracking-[0.12em] text-clay">
             See the drink list
@@ -151,35 +180,48 @@ export function EatPage() {
                         </p>
                         <h2 className="mt-1 font-display text-3xl text-cream">{group.category.name}</h2>
                       </div>
-                      <span className="rounded-full bg-cream/10 px-3 py-1 text-[0.58rem] uppercase tracking-[0.12em] text-cream/60 backdrop-blur">
-                        Illustrative
-                      </span>
+                      {group.category.imageUrl?.endsWith('.svg') ? (
+                        <span className="rounded-full bg-cream/10 px-3 py-1 text-[0.58rem] uppercase tracking-[0.12em] text-cream/60 backdrop-blur">
+                          Illustration
+                        </span>
+                      ) : null}
                     </div>
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     {group.category.description ? (
                       <p className="mb-5 max-w-lg text-sm leading-relaxed text-ink/55">
                         {group.category.description}
                       </p>
                     ) : null}
-                    <div className="grid gap-x-10 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-x-10">
                       {group.items.map((product) => (
-                        <div key={product.id} className="menu-row">
-                          <div className="min-w-0">
+                        <div key={product.id} className="menu-row min-w-0 items-start">
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl sm:h-[4.5rem] sm:w-[4.5rem]">
+                            <SmartImage
+                              src={product.imageUrl}
+                              alt=""
+                              className="h-full w-full"
+                              imgClassName="object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
                             <p className="font-display text-xl leading-snug">{product.name}</p>
                             {product.description ? (
                               <p className="mt-1 text-xs leading-relaxed text-ink/50">{product.description}</p>
                             ) : null}
                           </div>
-                          <div className="shrink-0 text-right">
+                          <div className="flex shrink-0 flex-col items-end gap-2 text-right">
                             {product.priceCents > 0 ? (
-                              <span className="text-sm font-semibold">
-                                {formatMoney(product.priceCents, currency)}
-                              </span>
+                              <>
+                                <span className="text-sm font-semibold">
+                                  {formatMoney(product.priceCents, currency)}
+                                </span>
+                                <AddButton product={product} />
+                              </>
                             ) : (
                               <span className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-ink/35">
-                                Price pending
+                                Ask your server
                               </span>
                             )}
                           </div>
@@ -192,6 +234,18 @@ export function EatPage() {
             ))}
           </div>
         )}
+
+        {!loading && !error && grouped.length > 0 ? (
+          <div className="mx-auto mt-16 max-w-3xl space-y-2 border-t border-line/70 pt-8 text-center text-[0.7rem] leading-relaxed text-ink/45">
+            <p className="flex items-center justify-center gap-2 font-semibold uppercase tracking-[0.16em] text-ink/60">
+              <Moon className="h-3.5 w-3.5 text-gold" />
+              {FOOD_NOTES.lateNight}
+            </p>
+            <p>{FOOD_NOTES.cash}</p>
+            <p>{FOOD_NOTES.raw}</p>
+            <p>Photos from @mezzaninerooftop. Other dish images are illustrative and may not match the plate as served.</p>
+          </div>
+        ) : null}
       </section>
 
       <section className="bg-ink py-16 text-cream lg:py-20">
@@ -202,7 +256,7 @@ export function EatPage() {
               The bar is <em className="text-gold">open</em>.
             </h2>
             <p className="mt-2 max-w-lg text-sm text-cream/60">
-              Cocktails, Wisconsin beer and cider, and a short wine list — all with sample pricing in this demo.
+              Handcrafted cocktails, Wisconsin beer and cider, and a short wine list.
             </p>
           </div>
           <Link to="/drink" className="btn-gold">

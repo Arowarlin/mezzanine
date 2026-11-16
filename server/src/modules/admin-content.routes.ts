@@ -9,7 +9,11 @@ import { requireAuth } from '../middleware/auth';
 export const adminContentRouter = Router();
 adminContentRouter.use(requireAuth);
 
-const imageUrlSchema = z.string().trim().url('URL de imagen inválida');
+// Acepta URLs absolutas o rutas del propio sitio (p. ej. /photos/venue-entrance.jpg).
+const imageUrlSchema = z.union([
+  z.string().trim().url('URL de imagen inválida'),
+  z.string().trim().regex(/^\/(?!\/)[\w\-./]+$/, 'URL de imagen inválida'),
+]);
 
 const gallerySchema = z.object({
   url: imageUrlSchema,

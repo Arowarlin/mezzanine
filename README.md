@@ -9,14 +9,15 @@ Rediseño completo del sitio de **Mezzanine**, el rooftop bar and kitchen de Egg
 ### Sitio público (inglés)
 
 - **Home** con hero cinematográfico, presentación de la experiencia, acceso a Eat/Drink, platos destacados, cócteles, galería y ubicación.
-- **Eat** con pestañas Lunch/Dinner, categorías, imagen ilustrativa por categoría y precios pendientes de confirmación.
-- **Drink** con los 10 cócteles del menú oficial, 9 cervezas/sidras de Wisconsin y 14 vinos, con precios de muestra.
+- **Eat** con el menú real de Lunch y Dinner 2026: nombres, descripciones y precios exactos del sitio oficial, imagen por plato (foto o ilustración) y botón para el pedido demo.
+- **Drink** con los 10 cócteles del menú oficial, 9 cervezas/sidras de Wisconsin y 14 vinos (sin precio: el sitio oficial no los publica).
 - **About** con contexto de Egg Harbor y Door County, sin historias inventadas.
 - **Gallery** con filtros, grid masonry y lightbox navegable por teclado.
 - **Reservations** con fecha, personas, franjas, cupo simulado y confirmación de demo.
 - **Contact** con dirección, teléfono, mapa, horarios pendientes, redes y enlace al sitio oficial.
 - **Careers** con el mensaje verificado “Now hiring all positions” y llamada telefónica.
-- **Demo pre-order** con carrito, cantidades, notas, subtotal y confirmación; solo bebidas con precio de muestra.
+- **Demo pre-order** con carrito, cantidades, notas, subtotal y confirmación; usa los platos con precio publicado y bloquea las bebidas sin precio.
+- **Ilustraciones propias** en SVG para platos y bebidas (51) y para las 8 categorías; algunos platos usan además fotos reales de @mezzaninerooftop. Se reemplazan desde el panel o por archivo con el mismo nombre.
 
 ### Panel administrativo (español, interno)
 
@@ -102,7 +103,7 @@ npm run db:migrate
 npm run db:seed
 ```
 
-El seed deja 8 categorías, 58 productos, 8 imágenes de galería y 1 puesto de empleo. Reemplaza el catálogo y la galería, pero conserva pedidos, reservas, clientes y usuarios.
+El seed deja 8 categorías, 76 productos (43 de comida y 33 de bebida), 8 imágenes de galería y 1 puesto de empleo. Reemplaza el catálogo y la galería, pero conserva pedidos, reservas, clientes y usuarios.
 
 ### 5. Desarrollo
 

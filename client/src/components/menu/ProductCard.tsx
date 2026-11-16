@@ -52,7 +52,7 @@ export function ProductCard({ product, currency }: ProductCardProps) {
           {priced ? (
             <span className="text-sm font-semibold text-ink">{formatMoney(product.priceCents, currency)}</span>
           ) : (
-            <span className="chip chip-gold">Pricing pending</span>
+            <span className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-ink/40">At the bar</span>
           )}
 
           {priced ? (
@@ -67,7 +67,7 @@ export function ProductCard({ product, currency }: ProductCardProps) {
               {added ? 'Added' : 'Add'}
             </button>
           ) : (
-            <span className="text-[0.64rem] uppercase tracking-[0.12em] text-ink/35">Ask your server</span>
+            <span className="text-[0.62rem] uppercase tracking-[0.12em] text-ink/35">Ask your server</span>
           )}
         </div>
       </div>

@@ -10,7 +10,14 @@ import { requireAuth } from '../middleware/auth';
 export const adminCatalogRouter = Router();
 adminCatalogRouter.use(requireAuth);
 
-const imageUrlSchema = z.union([z.string().trim().url('URL de imagen inválida'), z.literal('')]).optional();
+// Acepta URLs absolutas o rutas del propio sitio (p. ej. /menu/ceviche.svg, /uploads/foto.jpg).
+const imageUrlSchema = z
+  .union([
+    z.string().trim().url('URL de imagen inválida'),
+    z.string().trim().regex(/^\/(?!\/)[\w\-./]+$/, 'URL de imagen inválida'),
+    z.literal(''),
+  ])
+  .optional();
 
 const categorySchema = z.object({
   name: z.string().trim().min(2, 'El nombre es obligatorio').max(120),

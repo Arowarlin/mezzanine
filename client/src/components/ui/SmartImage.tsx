@@ -25,14 +25,18 @@ export function SmartImage({ src, alt, className = '', imgClassName = '', eager 
     )
   }
 
+  // className va en el contenedor (tamaño, forma, posición); la imagen siempre lo
+  // llena. Así un `w-full` de la imagen nunca anula el tamaño pedido.
   return (
-    <img
-      src={src}
-      alt={alt}
-      loading={eager ? 'eager' : 'lazy'}
-      decoding="async"
-      onError={() => setFailed(true)}
-      className={`${className} ${imgClassName}`}
-    />
+    <span className={`block ${className}`}>
+      <img
+        src={src}
+        alt={alt}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        onError={() => setFailed(true)}
+        className={`block h-full w-full ${imgClassName}`}
+      />
+    </span>
   )
 }

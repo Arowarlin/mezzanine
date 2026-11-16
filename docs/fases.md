@@ -62,14 +62,14 @@ Rama de trabajo: `mezzanine-local-redesign`, creada desde `main`. El estado ante
 **Hecho**
 
 - `HomePage`: hero cinematográfico, experiencia, Eat/Drink, platos destacados, cócteles, galería y ubicación.
-- `EatPage`: pestañas Lunch/Dinner, categorías, imagen ilustrativa por categoría, precios pendientes.
-- `DrinkPage`: cócteles en tarjetas, cerveza y vino en listas agrupadas; precios de muestra.
+- `EatPage`: pestañas Lunch/Dinner, categorías, imagen por plato (foto o ilustración), precios publicados y botón Add.
+- `DrinkPage`: cócteles en tarjetas, cerveza y vino en listas agrupadas; sin precios (no publicados).
 - `AboutPage`: contexto de Egg Harbor/Door County, experiencia y aviso demo.
 - `GalleryPage`: filtros, masonry, lightbox con teclado y contador.
 - `ReservationsPage`: formulario demo completo con franjas, cupo, validación y confirmación.
 - `ContactPage`: dirección, teléfono, mapa embebido, horarios pendientes, redes y sitio oficial.
 - `CareersPage`: introducción, cultura, puestos publicados y llamada telefónica.
-- `OrderPage`: carrito demo, solo recogida, solo bebidas con precio, notas por ítem y confirmación.
+- `OrderPage`: carrito demo, solo recogida, platos con precio publicado, notas por ítem y confirmación.
 - `CartDrawer` y `NotFoundPage` en inglés.
 - Redirecciones de rutas antiguas (`/menu`, `/nosotros`, `/galeria`, etc.).
 
@@ -84,7 +84,7 @@ Rama de trabajo: `mezzanine-local-redesign`, creada desde `main`. El estado ante
 **Hecho**
 
 - Migración `002_mezzanine.sql` con `kind`, `menu_type`, `ingredients`, `origin`, `is_demo`, categoría de galería y tabla de empleos.
-- Seed nuevo: 8 categorías, 58 productos (18 platos duplicados lunch/dinner, 10 cócteles, 9 cervezas, 14 vinos), 8 imágenes, 1 puesto.
+- Seed nuevo: 8 categorías, 76 productos (43 de comida: 22 lunch + 21 dinner; 10 cócteles, 9 cervezas, 14 vinos), 8 imágenes, 1 puesto.
 - API pública con filtros por menú, campos nuevos, galería por categoría y empleos.
 - CRUD administrativo de galería y empleos.
 - Ajustes nuevos y validaciones (URLs, email opcional, WhatsApp opcional, `demo_mode`).
@@ -127,8 +127,8 @@ Rama de trabajo: `mezzanine-local-redesign`, creada desde `main`. El estado ante
 - Migración y seed contra MariaDB 3307 ✅
 - API pública: settings, categorías, productos por menú, galería, empleos ✅
 - Login admin y endpoints protegidos ✅
-- Pedido demo con bebida: 201, `isDemo=true`, `whatsappUrl=null` ✅
-- Pedido con plato sin precio: 400 con detalle ✅
+- Pedido demo con plato: 201, `isDemo=true`, `whatsappUrl=null` ✅
+- Pedido con bebida sin precio: 400 con detalle ✅
 - Reserva demo en fecha abierta: 201 ✅
 - Render de 11 rutas públicas con Chrome headless ✅
 - QA de layout desktop 1440 y móvil 390: sin overflow, sin imágenes rotas, sin excepciones ✅
@@ -136,9 +136,9 @@ Rama de trabajo: `mezzanine-local-redesign`, creada desde `main`. El estado ante
 
 **Limitaciones conocidas**
 
-- `npm --prefix server run lint` no funciona en el proyecto heredado: el script apunta a `tests/` (no existe) y no hay `eslint.config.*` para ESLint 10. Se dejó constancia; el build de TypeScript sí pasa.
+- `npm --prefix server run lint` ✅ con `server/eslint.config.mjs`.
 - No hay navegador visual integrado en el agente; la QA se hizo con Chrome headless (DOM, métricas y capturas), no con inspección visual humana.
-- Las fotos son ilustrativas y deben reemplazarse.
+- Las fotos de Instagram y las ilustraciones son material de demostración; confirmar permisos y créditos antes de publicar.
 
 ## Fase 8 — Documentación
 
@@ -150,11 +150,35 @@ Rama de trabajo: `mezzanine-local-redesign`, creada desde `main`. El estado ante
 - `docs/datos-pendientes.md` con el inventario completo de datos por confirmar.
 - Este archivo (`docs/fases.md`).
 
+## Fase 9 — Menú real 2026 e ilustraciones
+
+**Hecho**
+
+- Menú de comida real: **22 platos de lunch** y **21 de dinner**, con nombres, descripciones y precios exactos del sitio oficial.
+- Extras y notas al pie conservados: panko shrimp, Nueske's bacon, chili-lime fries, a la mode, aviso de alimentos crudos, precio con descuento en efectivo y late night menu.
+- Bebidas reales: 10 cócteles, 9 cervezas/sidras y 14 vinos, sin precios porque el sitio oficial no los publica. Se muestran como “At the bar” / “Ask your server”.
+- Corregidas cuatro erratas del sitio: New Zealand, Riesling, Monterey y Castilla.
+- Horario oficial tomado del Instagram: cerrado martes y miércoles; jueves a lunes, 12–8pm. La temporada 2026 terminó el 31 de octubre.
+- 51 ilustraciones SVG propias para platos y bebidas, más 8 para categorías, en `client/public/menu/`; algunos platos usan fotos reales de Instagram en `client/public/photos/`.
+- El carrito demo ahora usa los platos con precio; el servidor bloquea las bebidas sin precio.
+- `SmartImage` corregido para que las miniaturas no se estiren ni desborden en móvil.
+- El panel acepta rutas relativas como `/menu/ceviche.svg`.
+
+**Datos y pruebas**
+
+- Seed ejecutado contra MariaDB 3307: 8 categorías y 76 productos (43 comida + 33 bebida).
+- Pedidos y reservas existentes conservados tras el seed.
+- Pedido demo con plato: 201, `isDemo=true`, `whatsappUrl=null`.
+- Pedido con bebida sin precio: 400.
+- Carrito UI: agregar plato, abrir drawer y llegar a `/order` ✅.
+- QA de 9 páginas públicas en 7 anchos (320–1440 px): sin desbordamiento, imágenes rotas ni excepciones.
+- Admin verificado con 76 productos y rutas de imagen relativas.
+
 ## Pendiente antes de publicar
 
 1. Aprobación del restaurante y de todos los datos marcados como pendientes.
 2. Horarios definitivos.
-3. Menús, descripciones y precios reales.
+3. Precios de bebidas, alérgenos y vigencia de la carta.
 4. Correo/WhatsApp y proceso real de reservas y pedidos.
 5. Fotografía oficial autorizada.
 6. Dominio, analítica, privacidad y aviso legal.

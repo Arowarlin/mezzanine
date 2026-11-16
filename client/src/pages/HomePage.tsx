@@ -10,10 +10,8 @@ import { Reveal } from '../components/ui/Reveal'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { SmartImage } from '../components/ui/SmartImage'
 
-const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2000&q=85'
-const ROOM_IMAGE =
-  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80'
+const HERO_IMAGE = '/photos/venue-sunset-bay.jpg'
+const ROOM_IMAGE = '/photos/venue-rooftop-deck.jpg'
 
 export function HomePage() {
   const { settings, currency } = useSettings()
@@ -31,7 +29,7 @@ export function HomePage() {
       .then(([productsData, dinnerData, galleryData]) => {
         if (!active) return
         setFeatured(productsData.products.slice(0, 4))
-        const mains = dinnerData.products.filter((product) => product.categoryName === 'Mains')
+        const mains = dinnerData.products.filter((product) => product.categorySlug === 'dinner-plates')
         setDishes((mains.length > 0 ? mains : dinnerData.products).slice(0, 4))
         setGallery(galleryData.images.slice(0, 4))
       })
@@ -52,7 +50,7 @@ export function HomePage() {
       <section className="relative flex min-h-[92vh] items-end overflow-hidden bg-ink pb-14 pt-40 text-cream sm:pb-20">
         <SmartImage
           src={HERO_IMAGE}
-          alt="A dining room at dusk"
+          alt="Sunset over Horseshoe Bay from the Mezzanine rooftop"
           className="absolute inset-0 h-full w-full"
           imgClassName="h-full w-full object-cover opacity-55 hero-zoom"
           eager
@@ -99,12 +97,12 @@ export function HomePage() {
           <div className="relative overflow-hidden rounded-[2rem]">
             <SmartImage
               src={ROOM_IMAGE}
-              alt="The Mezzanine dining room"
+              alt="The rooftop deck at Mezzanine, overlooking the bay"
               className="aspect-[4/3] w-full"
               imgClassName="h-full w-full object-cover"
             />
             <div className="absolute bottom-5 left-5 rounded-full bg-ink/80 px-4 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-cream/80 backdrop-blur">
-              Illustration for this proposal
+              Photo · @mezzaninerooftop
             </div>
           </div>
         </Reveal>
@@ -154,17 +152,15 @@ export function HomePage() {
                 to: '/eat',
                 eyebrow: 'Kitchen',
                 title: 'Eat',
-                text: 'Lunch and dinner menus, from whitefish chowder to the Mezzanine burger.',
-                image:
-                  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80',
+                text: 'Lunch and dinner menus, from whitefish ceviche to the Mezzanine burger.',
+                image: '/photos/food-fresh-mussels-800.jpg',
               },
               {
                 to: '/drink',
                 eyebrow: 'Bar',
                 title: 'Drink',
                 text: 'Handcrafted cocktails, Wisconsin beer and cider, and a short wine list.',
-                image:
-                  'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1200&q=80',
+                image: '/photos/drinks-sunset-cocktails-800.jpg',
               },
             ].map((card, index) => (
               <Reveal key={card.to} delay={index * 90}>
@@ -206,7 +202,7 @@ export function HomePage() {
                     Dinner, <em className="text-clay">upstairs</em>.
                   </>
                 }
-                description="A short look at the dinner menu. Item names come from recent public menus; descriptions and prices are pending confirmation."
+                description="A short look at the dinner menu — Lake Michigan whitefish, seared ahi tuna and plates built for a long evening on the roof."
               />
               <Link to="/eat" className="btn-ghost mt-7 text-ink/70">
                 See lunch &amp; dinner
@@ -225,9 +221,13 @@ export function HomePage() {
                       {dish.categoryName}
                     </p>
                   </div>
-                  <span className="shrink-0 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-ink/35">
-                    Price pending
-                  </span>
+                  {dish.priceCents > 0 ? (
+                    <span className="shrink-0 text-sm font-semibold">{formatMoney(dish.priceCents, currency)}</span>
+                  ) : (
+                    <span className="shrink-0 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-ink/35">
+                      Ask your server
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -245,7 +245,7 @@ export function HomePage() {
                   Cocktails worth <em className="text-clay">staying</em> for.
                 </>
               }
-              description="Ingredient lists come from the official menu. Prices shown are samples for this demo."
+              description="House infusions, fresh citrus and garden herbs — built to be sipped slowly above the bay."
             />
             <Link to="/drink" className="btn-ghost text-ink/70">
               All drinks
@@ -264,11 +264,8 @@ export function HomePage() {
                     <h3 className="mt-2 font-display text-2xl leading-tight">{product.name}</h3>
                     <p className="mt-2 text-xs leading-relaxed text-ink/55">{product.ingredients}</p>
                   </div>
-                  <p className="mt-5 text-sm font-semibold">
-                    {formatMoney(product.priceCents, currency)}
-                    <span className="ml-2 text-[0.6rem] font-medium uppercase tracking-[0.12em] text-ink/35">
-                      sample
-                    </span>
+                  <p className="mt-5 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-ink/40">
+                    {product.priceCents > 0 ? formatMoney(product.priceCents, currency) : 'At the bar'}
                   </p>
                 </Link>
               </Reveal>
@@ -284,7 +281,7 @@ export function HomePage() {
               <SectionHeading
                 eyebrow="The gallery"
                 title="A look around"
-                description="Illustrative photography for this proposal."
+                description="Moments from the rooftop, shared on @mezzaninerooftop."
                 light
               />
               <Link to="/gallery" className="btn border border-cream/30 text-cream hover:border-cream/70">
@@ -324,8 +321,8 @@ export function HomePage() {
               Find us <em className="text-clay">upstairs</em>.
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-ink/60">
-              {address}, {city}, WI 54209. Call for the day&apos;s hours — the official site currently lists two
-              different schedules, so we treat them as pending confirmation.
+              {address}, {city}, WI 54209. Closed Tuesday &amp; Wednesday; Thursday–Monday, 12–8pm.
+              The 2026 season ended October 31 — call before you drive.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/reservations" className="btn-primary">
@@ -354,8 +351,9 @@ export function HomePage() {
               <div>
                 <p className="font-semibold">Hours</p>
                 <p className="text-ink/55">
-                  Pending confirmation. The official site shows both “closed Tuesday &amp; Wednesday” and “7 days a
-                  week, 11am–9pm”.
+                  Closed Tuesday &amp; Wednesday · Thursday–Monday, 12–8pm.
+                  <br />
+                  The 2026 season ended October 31; confirm reopening for 2027.
                 </p>
               </div>
             </div>

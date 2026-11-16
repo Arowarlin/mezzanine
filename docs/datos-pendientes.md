@@ -14,96 +14,33 @@ Este documento separa lo **verificado** de lo que sigue **pendiente de aprobaci�
 | Sitio oficial | Verificado | <https://www.mezzaninerooftop.com/> |
 | Correo público | **No disponible** | No se encontró un correo oficial; el sitio oculta el campo en vez de inventarlo |
 | WhatsApp público | **No disponible** | El teléfono publicado es fijo; no se usa WhatsApp en la demo |
-| Horarios | **Pendiente / contradictorio** | El footer oficial dice “Closed Tuesday & Wednesday”; la portada dice “7 days a week, 11am–9pm” |
+| Horarios | **Verificado (Instagram)** | Cerrado martes y miércoles; jueves a lunes, 12–8pm. La temporada 2026 terminó el 31 de octubre |
 | Logo | Verificado | Se usa el archivo original del sitio oficial, sin redibujar; las variantes de transparencia y texto blanco se generan desde el original |
-| Fotografías | **Ilustrativas** | No se copiaron fotografías del restaurante; se usan recursos de Unsplash |
+| Fotografías | **Reales (Instagram)** | 10 fotos de @mezzaninerooftop (junio–octubre 2026) en `client/public/photos/`; los platos sin foto usan ilustraciones propias |
 
 ## 2. Menú de comida (lunch / dinner)
 
-Los platos sembrados provienen de listados públicos (Restaurantji, Door County Pulse, Zmenu) y de menciones en el sitio oficial. **No se inventaron recetas, descripciones ni precios.**
+**Verificado.** Nombres, descripciones y precios se copiaron de los menús publicados en el sitio oficial (imágenes `Mezzanine_Lunch_2026` y `Mezzanine_Dinner_2026` en `/lunch` y `/dinner`). La fuente de datos es `server/src/db/food-menu.ts`.
 
-| Plato | Menú asignado | Precio | Estado |
-| --- | --- | --- | --- |
-| Whitefish Chowder | Lunch y dinner | — | Pendiente de precio y confirmación |
-| Cheese Curds | Lunch y dinner | — | Pendiente de precio y confirmación |
-| Smoked Whitefish Dip | Lunch y dinner | — | Pendiente de precio y confirmación |
-| Bruschetta | Lunch y dinner | — | Pendiente de precio y confirmación |
-| Whitefish Cakes | Dinner | — | Pendiente de precio y confirmación |
-| Tuna Tacos | Lunch y dinner | — | Pendiente de precio y confirmación |
-| Candied Walnut Salad | Lunch y dinner | — | Pendiente de precio y confirmación |
-| Pastrami Reuben | Lunch | — | Pendiente de precio y confirmación |
-| Mezzanine Burger | Lunch y dinner | — | Pendiente de precio y confirmación |
-| Pulled Pork Sandwich | Lunch | — | Pendiente de precio y confirmación |
-| Smoked Whitefish Bagel | Lunch | — | Pendiente de precio y confirmación |
-| Shrimp Wrap | Lunch | — | Pendiente de precio y confirmación |
-| Mushroom Linguine | Dinner | — | Pendiente de precio y confirmación |
-| Pesto Linguine | Dinner | — | Pendiente de precio y confirmación |
-| Pan Fried Whitefish | Dinner | — | Pendiente de precio y confirmación |
-| Pork Chop | Dinner | — | Pendiente de precio y confirmación |
-| Tenderloin | Dinner | — | Pendiente de precio y confirmación |
-| Lavender Crème Brûlée | Dinner | — | Pendiente de precio y confirmación |
+- Lunch: 22 opciones (Appetizers, Lunch, Soup & Salads, Desserts).
+- Dinner: 21 opciones (Appetizers, Dinner, Desserts).
+- Los extras se conservan en la descripción: "add 5 panko crusted shrimp 8", "add nueske's bacon 2.5", "sub chili-lime fries w/ ancho-garlic aioli for $2", "a la mode w/ cinnamon ice cream 2.5".
+- El asterisco (\*) del nombre remite al aviso de alimentos crudos o poco cocidos, que se muestra al pie del menú junto con "Menu prices reflect discounted cash payment price" y "Late night menu available after 9pm".
+- La sopa no tiene nombre en el menú (es la sopa del día): se publica como *Soup (Cup)* $6 y *Soup (Bowl)* $9.
+- Las imágenes de los platos combinan **fotos reales de @mezzaninerooftop** (ceviche, mejillones y atún) e **ilustraciones propias** para el resto (`client/public/menu/*.svg`, generadas con `python scripts/make_menu_art.py`). Se reemplazan desde el panel admin o sustituyendo el archivo con el mismo nombre.
 
-Notas:
-
-- La asignación lunch/dinner es una **hipótesis de trabajo** basada en los listados; debe validarse contra los menús vigentes.
-- Los platos de desayuno que aparecen en algunos listados (maple-cherry crepes, pastrami benedict, whitefish cake benedict, house drop donuts) **no se incluyeron** porque no se pudieron confirmar en los menús actuales.
-- Los precios de comida se guardan como `0` y la interfaz muestra “Pricing pending”. No se pueden pedir en la demo.
+Pendiente: alérgenos, el contenido exacto del late night menu y confirmar que los precios siguen vigentes cuando cambie la temporada.
 
 ## 3. Bebidas
 
-### Cócteles (10, ingredientes verificados)
+**Verificado** en `/cocktails`, `/wine` y `/beer` del sitio oficial (fuente de datos: `server/src/db/drink-menu.ts`).
 
-Los ingredientes provienen del menú oficial de cócteles. **Los precios son de muestra** para que el carrito de demostración funcione; no son precios reales.
+- 10 cócteles con sus ingredientes, 9 cervezas o sidras con estilo, cervecería y origen, y 14 vinos con varietal y origen.
+- **El sitio oficial no publica precios de bebidas.** Se eliminaron los precios de muestra que había antes: las bebidas se muestran sin precio ("At the bar" / "Ask your server") y no se pueden añadir al pedido demo.
+- Erratas del sitio oficial corregidas: "ew zealand" → New Zealand, "reisling" → Riesling, "monterray" → Monterey, "castillo" → Castilla.
+- Las imágenes de las bebidas en la carta son ilustraciones propias; la portada de Drink usa una foto de Instagram.
 
-| Cóctel | Precio demo |
-| --- | --- |
-| Thai Basil Margarita | $14.00 |
-| Yolanda Be Cool | $15.00 |
-| Guava: A Love Story | $15.00 |
-| Watermelon Cilantro Margarita | $14.00 |
-| Cherry Mule | $13.00 |
-| Watermelon Cucumber Cooler | $13.00 |
-| Supper Club Old Fashioned | $14.00 |
-| Raspberry Mint Mojito | $13.00 |
-| Lavender Lemon Drop Martini | $15.00 |
-| Lavender Gin Fizz | $14.00 |
-
-### Cerveza y sidra (9, estilos y orígenes verificados)
-
-| Bebida | Estilo | Origen | Precio demo |
-| --- | --- | --- | --- |
-| Narragansett | Pilsner | Rhode Island | $6.00 |
-| All Day IPA | Session IPA | Founders, Grand Rapids, MI | $7.00 |
-| Chaos Pattern | Hazy IPA | 3 Sheeps, Sheboygan, WI | $8.00 |
-| Honey Blonde | Cream ale | Central Waters, Amherst, WI | $7.00 |
-| Little Sister | Wheat ale | Door County Brewing, WI | $7.00 |
-| Ouisconsing | Amber / red ale | Central Waters, Amherst, WI | $7.00 |
-| Cherry Wheat | Wheat ale | Hinterland, Green Bay, WI | $7.00 |
-| Cherry Lager | Fruited lager | One Barrel, Door County, WI | $7.00 |
-| Island Orchard Cider | Cider | Island Orchard, Ellison Bay, WI | $8.00 |
-
-Pendiente: formato (draft / botella / lata), tamaño de la porción y precio real.
-
-### Vino (14, orígenes y notas verificados)
-
-| Vino | Varietal / tipo | Origen | Precio demo |
-| --- | --- | --- | --- |
-| Door 44 Petite Rosé | Rosé | Sturgeon Bay, WI | $12.00 |
-| L'Agnostique Rosé | Rosé (dry) | Francia | $12.00 |
-| Los Monteros Cava | Cava | España | $13.00 |
-| Innocent Bystander Sauvignon Blanc | Sauvignon Blanc | Marlborough, NZ | $13.00 |
-| Freixenet Pinot Grigio | Pinot Grigio | Barcelona, España | $11.00 |
-| Austin Hope Chardonnay | Chardonnay (assertive oak) | Paso Robles, CA | $18.00 |
-| Bulletin Place Chardonnay | Chardonnay (light oak) | Barossa, Australia | $14.00 |
-| Tarrica Riesling | Riesling | Monterey, CA | $12.00 |
-| Don Rodolfo Pinot Noir | Pinot Noir | Mendoza, Argentina | $13.00 |
-| Casa Santos Lima Red Blend | Red blend | Lisboa, Portugal | $12.00 |
-| Treana Cabernet | Cabernet Sauvignon | Paso Robles, CA | $18.00 |
-| Ernesto Padrillos Catena Malbec | Malbec | Mendoza, Argentina | $16.00 |
-| True Myth Cabernet | Cabernet Sauvignon | Paso Robles, CA | $15.00 |
-| Mesta Tempranillo | Tempranillo | Castilla, España | $13.00 |
-
-Pendiente: si el precio es por copa o por botella, tamaño de la copa y disponibilidad por temporada. La interfaz lo etiqueta como “Sample glass price”.
+Pendiente: precios, precio por copa o por botella, y formato de la cerveza (la carta oficial dice "Packaged").
 
 ## 4. Empleo
 
@@ -115,23 +52,49 @@ Pendiente: si el precio es por copa o por botella, tamaño de la copa y disponib
 
 - Ambos flujos funcionan contra la base local, pero son **demostraciones**: no envían correo, SMS, WhatsApp ni notificaciones.
 - La disponibilidad de reservas es simulada con `open_time`, `close_time`, `slot_minutes`, `seats_per_slot` y `closed_days`.
-- Los pedidos son **solo para recoger** y solo aceptan bebidas con precio de muestra. Los platos sin precio se bloquean en el servidor.
+- Los pedidos son **solo para recoger** y usan los platos con precio publicado. Los productos sin precio (bebidas) se bloquean en el servidor.
 - No hay pagos, propinas, impuestos ni integración con cocina.
 
 ## 6. Contenido editorial
 
 - Los textos de portada, About y Careers son propuestas de redacción basadas en datos verificados; el restaurante debe aprobarlos.
 - No se inventaron historias de propietarios, premios, años de operación ni datos corporativos.
-- Las fotografías son ilustrativas y deben sustituirse por material autorizado de Mezzanine.
+- Las fotografías vienen del Instagram oficial @mezzaninerooftop (ver sección 8). Hay que confirmar con el restaurante que se pueden usar en la web y, si alguna es de un fotógrafo externo, darle crédito.
 
 ## 7. Qué falta antes de una publicación real
 
-1. Confirmar horarios y días de cierre.
-2. Confirmar menús, descripciones, alérgenos y precios de comida.
-3. Confirmar precios y formatos de bebidas.
+1. Confirmar la reapertura 2027 y la vigencia de los horarios.
+2. Confirmar alérgenos y vigencia de precios de comida.
+3. Obtener precios y formatos de bebidas (no están publicados).
 4. Confirmar correo, WhatsApp y proceso real de reservas/pedidos.
-5. Sustituir las fotos ilustrativas por fotografía oficial autorizada.
+5. Confirmar el permiso de uso de las fotos de Instagram y conseguir más fotos de platos y del interior.
 6. Confirmar por escrito la autorización de uso del logo original y del material fotográfico.
 7. Confirmar vacantes y proceso de aplicación.
 8. Definir dominio, analítica, aviso de privacidad y cumplimiento legal.
 9. Autorizar expresamente la publicación (hoy el sitio está en `noindex` y es solo local).
+
+## 8. Fotos de Instagram (@mezzaninerooftop)
+
+Descargadas el 16-nov-2026 sin iniciar sesión, por lo que solo eran accesibles las 12 publicaciones más recientes. Se optimizaron a 1800 px y 800 px (`-800`), en JPEG.
+
+| Archivo | Publicación | Uso en la web |
+| --- | --- | --- |
+| `venue-sunset-bay` | 2-jul-2026 | Hero de Home, Reservations y login admin; galería |
+| `venue-rooftop-deck` | 3-sep-2026 | Sección "golden hour" de Home, Careers, Reservations; galería |
+| `venue-fall-table` | 4-oct-2026 | Hero de About; galería |
+| `venue-entrance` | 22-jun-2026 | About, Careers; galería |
+| `food-baja-ahi-tuna` | 21-jun-2026 | Plato Baja Ahi Tuna, categoría Dinner, hero de Eat; galería |
+| `food-fresh-mussels` | 31-ago-2026 | Plato Fresh Mussels, tarjeta Eat de Home; galería |
+| `food-whitefish-ceviche` | 13-sep-2026 | Plato Whitefish Ceviche, categoría Appetizers; galería |
+| `drinks-sunset-cocktails` | 27-jun-2026 | Hero de Drink, categoría Cocktails, tarjeta Drink de Home; galería |
+| `drinks-citrus-cocktail` | 4-sep-2026 | About; galería |
+| `drinks-basil-cocktail` | 19-jul-2026 | Careers; galería |
+
+No se usaron:
+- El retrato de dos empleadas (20-jun-2026): son personas identificables y se necesita su permiso.
+- La foto de los shots con banderas (3-jul-2026): solo estaba disponible a 640 px.
+
+Pendiente:
+- Confirmar qué cóctel aparece en cada foto, para asignarla a su bebida en la carta.
+- Iniciar sesión en Instagram para revisar las publicaciones más antiguas.
+

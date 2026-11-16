@@ -43,8 +43,8 @@ Todas las columnas usan `ADD COLUMN IF NOT EXISTS` para poder re-ejecutar la mig
 
 ### Reglas de contenido
 
-- Los platos sin precio confirmado usan `price_cents = 0`; la UI muestra “Pricing pending” y el servidor rechaza pedidos con esos productos.
-- Las bebidas usan precios de muestra y `is_demo = 1`.
+- Los productos sin precio publicado (bebidas) usan `price_cents = 0`; la UI muestra “Ask your server” y el servidor rechaza pedidos con esos productos.
+- La comida usa los precios publicados en los menús 2026 (`server/src/db/food-menu.ts`); las imágenes del menú son SVG propios en `client/public/menu/`.
 - `products.slug` es único; los platos repetidos entre lunch y dinner usan prefijos (`lunch-…`, `dinner-…`).
 - El seed reemplaza catálogo, galería y empleos, pero **conserva** pedidos, reservas, clientes y usuarios.
 
@@ -121,7 +121,7 @@ No se implementó el selector en esta fase para no añadir complejidad sin conte
 
 ## 9. Decisiones y límites
 
-- **No se copiaron fotografías del restaurante**: se usan imágenes de Unsplash y se marcan como ilustrativas.
+- **Fotografías de @mezzaninerooftop**: se usan fotos públicas de Instagram para ambiente, galería y algunos platos; el resto son ilustraciones SVG propias. Todas se marcan como material de demostración.
 - **No se inventaron platos, recetas ni precios**: ver `docs/datos-pendientes.md`.
 - **Los horarios se muestran como pendientes** por la contradicción del sitio oficial.
 - **El correo y WhatsApp públicos no existen**: la UI los oculta en lugar de inventarlos.

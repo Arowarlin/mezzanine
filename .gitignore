@@ -39,3 +39,6 @@ desktop.ini
 
 # Cobertura de pruebas
 coverage/
+
+# Fotos originales de Instagram (las optimizadas están en client/public/photos)
+_originales-instagram/

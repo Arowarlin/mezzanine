@@ -30,6 +30,20 @@ const WINE_GROUPS: Array<{ label: string; match: (product: Product) => boolean }
   },
 ]
 
+function DrinkThumb({ src }: { src: string | null }) {
+  return (
+    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl">
+      <SmartImage src={src} alt="" className="h-full w-full" imgClassName="object-cover" />
+    </div>
+  )
+}
+
+function DrinkPrice({ cents, currency }: { cents: number; currency: string }) {
+  return cents > 0 ? (
+    <span className="shrink-0 text-sm font-semibold">{formatMoney(cents, currency)}</span>
+  ) : null
+}
+
 export function DrinkPage() {
   const { currency } = useSettings()
   const [tab, setTab] = useState<DrinkMenu>('cocktails')
@@ -70,8 +84,8 @@ export function DrinkPage() {
     <>
       <section className="relative overflow-hidden bg-ink pb-14 pt-36 text-cream sm:pb-16 sm:pt-44">
         <SmartImage
-          src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1800&q=80"
-          alt="Behind the bar"
+          src="/photos/drinks-sunset-cocktails.jpg"
+          alt="Cocktails at sunset on the Mezzanine rooftop"
           className="absolute inset-0 h-full w-full"
           imgClassName="h-full w-full object-cover opacity-35"
           eager
@@ -83,8 +97,8 @@ export function DrinkPage() {
             Drink <em className="text-gold">slowly</em>.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-cream/70">
-            Handcrafted cocktails, Wisconsin beer and cider, and a short wine list. Ingredient lists, styles, and
-            origins come from the official menu; prices are samples for this demo.
+            Handcrafted cocktails with house infusions, Wisconsin beer and cider, and a short wine list from Door
+            County to Mendoza.
           </p>
 
           <div className="mt-8 inline-flex flex-wrap rounded-full border border-cream/20 bg-cream/5 p-1">
@@ -114,10 +128,10 @@ export function DrinkPage() {
             ) : (
               <Wine className="h-3.5 w-3.5 text-clay" />
             )}
-            {activeTab.blurb} Prices are sample values, not confirmed menu prices.
+            {activeTab.blurb} Ask your server for pricing.
           </span>
-          <Link to="/order" className="inline-flex items-center gap-1.5 font-semibold uppercase tracking-[0.12em] text-clay">
-            Try the demo pre-order
+          <Link to="/eat" className="inline-flex items-center gap-1.5 font-semibold uppercase tracking-[0.12em] text-clay">
+            See the food menu
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -142,15 +156,16 @@ export function DrinkPage() {
           <div className="mx-auto max-w-4xl">
             <div className="grid gap-x-14 sm:grid-cols-2">
               {products.map((product) => (
-                <div key={product.id} className="menu-row">
-                  <div className="min-w-0">
+                <div key={product.id} className="menu-row min-w-0 items-center">
+                  <DrinkThumb src={product.imageUrl} />
+                  <div className="min-w-0 flex-1">
                     <p className="font-display text-xl leading-snug">{product.name}</p>
                     <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-ink/40">
                       {product.description}
                     </p>
                     <p className="mt-1 text-xs text-ink/50">{product.origin}</p>
                   </div>
-                  <span className="shrink-0 text-sm font-semibold">{formatMoney(product.priceCents, currency)}</span>
+                  <DrinkPrice cents={product.priceCents} currency={currency} />
                 </div>
               ))}
             </div>
@@ -161,14 +176,12 @@ export function DrinkPage() {
               <div key={group.label}>
                 <div className="flex items-baseline justify-between gap-4">
                   <h2 className="font-display text-3xl">{group.label}</h2>
-                  <span className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-ink/35">
-                    Sample glass price
-                  </span>
                 </div>
                 <div className="mt-4 grid gap-x-14 sm:grid-cols-2">
                   {group.items.map((product) => (
-                    <div key={product.id} className="menu-row">
-                      <div className="min-w-0">
+                    <div key={product.id} className="menu-row min-w-0 items-center">
+                      <DrinkThumb src={product.imageUrl} />
+                      <div className="min-w-0 flex-1">
                         <p className="font-display text-xl leading-snug">{product.name}</p>
                         <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-ink/40">
                           {product.ingredients}
@@ -176,9 +189,7 @@ export function DrinkPage() {
                         </p>
                         <p className="mt-1 text-xs text-ink/50">{product.origin}</p>
                       </div>
-                      <span className="shrink-0 text-sm font-semibold">
-                        {formatMoney(product.priceCents, currency)}
-                      </span>
+                      <DrinkPrice cents={product.priceCents} currency={currency} />
                     </div>
                   ))}
                 </div>
@@ -196,7 +207,7 @@ export function DrinkPage() {
               Start with <em className="text-clay">dinner</em>.
             </h2>
             <p className="mt-2 max-w-lg text-sm text-ink/60">
-              Lunch and dinner menus, from whitefish chowder to the Mezzanine burger.
+              Lunch and dinner menus, from whitefish ceviche to the Mezzanine burger.
             </p>
           </div>
           <Link to="/eat" className="btn-primary">

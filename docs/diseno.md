@@ -6,7 +6,7 @@ La propuesta parte de la identidad real del restaurante: un rooftop bar en Egg H
 
 Principios:
 
-- **Fotografía protagonista** en portada, secciones de menú y galería.
+- **Fotografía e ilustración protagonistas** en portada, secciones de menú y galería.
 - **Tipografía editorial** con una serif de alto contraste para titulares y una sans geométrica para interfaz.
 - **Paleta de puerto y atardecer**: verde profundo, crema, arena y un acento cobrizo.
 - **Composición asimétrica** y mucho aire; las tarjetas se reservan para elementos accionables (bebidas, empleos, formularios).
@@ -68,13 +68,13 @@ Reglas obligatorias:
 | --- | --- |
 | `/` | Hero, experiencia, acceso a Eat/Drink, platos destacados, cócteles destacados, galería, ubicación y CTA |
 | `/eat` | Lunch y dinner con pestañas, categorías, imagen ilustrativa por categoría y precios pendientes |
-| `/drink` | Cócteles en tarjetas visuales; cerveza y vino en listas; precios de muestra |
+| `/drink` | Cócteles en tarjetas visuales; cerveza y vino en listas con ilustraciones; sin precios (no publicados) |
 | `/about` | Contexto de Egg Harbor/Door County, experiencia rooftop y notas de marca |
 | `/gallery` | Filtros por categoría, grid masonry, lightbox con teclado |
 | `/reservations` | Formulario demo con fecha, personas, franjas, datos y confirmación |
 | `/contact` | Dirección, teléfono, mapa, horarios pendientes, redes y sitio oficial |
 | `/careers` | Introducción, cultura, puestos publicados y llamada telefónica |
-| `/order` | Carrito demo, solo recogida, solo bebidas con precio de muestra |
+| `/order` | Carrito demo, solo recogida; platos con precio publicado, bebidas sin precio bloqueadas |
 
 ## 7. Responsive
 

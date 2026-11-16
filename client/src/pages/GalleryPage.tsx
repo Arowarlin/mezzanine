@@ -75,8 +75,8 @@ export function GalleryPage() {
             A look <em className="text-gold">around</em>.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-cream/65">
-            The room, the bar, the plates, and the light. Photography in this proposal is illustrative and will be
-            replaced with authorized Mezzanine images.
+            The rooftop, the bar, the plates, and the light over Horseshoe Bay — as shared on
+            @mezzaninerooftop.
           </p>
         </div>
       </section>
@@ -138,7 +138,7 @@ export function GalleryPage() {
         )}
 
         <p className="mt-10 text-[0.62rem] uppercase tracking-[0.16em] text-ink/30">
-          Illustrative photography · not the restaurant&apos;s copyrighted images
+          Photos · @mezzaninerooftop on Instagram
         </p>
       </section>
 
