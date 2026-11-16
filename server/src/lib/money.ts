@@ -1,5 +1,5 @@
-export function formatMoney(cents: number, currency = 'DOP'): string {
-  return new Intl.NumberFormat('es-DO', {
+export function formatMoney(cents: number, currency = 'USD'): string {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,

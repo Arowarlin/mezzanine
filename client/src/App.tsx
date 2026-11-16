@@ -6,16 +6,20 @@ import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import { SettingsProvider } from './context/SettingsContext'
 import { AboutPage } from './pages/AboutPage'
+import { CareersPage } from './pages/CareersPage'
 import { ContactPage } from './pages/ContactPage'
+import { DrinkPage } from './pages/DrinkPage'
+import { EatPage } from './pages/EatPage'
 import { GalleryPage } from './pages/GalleryPage'
 import { HomePage } from './pages/HomePage'
-import { MenuPage } from './pages/MenuPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { OrderPage } from './pages/OrderPage'
 import { ReservationsPage } from './pages/ReservationsPage'
+import { AdminCareersPage } from './pages/admin/AdminCareersPage'
 import { AdminCategoriesPage } from './pages/admin/AdminCategoriesPage'
 import { AdminCustomersPage } from './pages/admin/AdminCustomersPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
+import { AdminGalleryPage } from './pages/admin/AdminGalleryPage'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminOrdersPage } from './pages/admin/AdminOrdersPage'
 import { AdminProductsPage } from './pages/admin/AdminProductsPage'
@@ -30,12 +34,23 @@ export default function App() {
           <Routes>
             <Route element={<PublicLayout />}>
               <Route index element={<HomePage />} />
-              <Route path="menu" element={<MenuPage />} />
-              <Route path="nosotros" element={<AboutPage />} />
-              <Route path="galeria" element={<GalleryPage />} />
-              <Route path="reservaciones" element={<ReservationsPage />} />
-              <Route path="pedido" element={<OrderPage />} />
-              <Route path="contacto" element={<ContactPage />} />
+              <Route path="eat" element={<EatPage />} />
+              <Route path="drink" element={<DrinkPage />} />
+              <Route path="about" element={<AboutPage />} />
+              <Route path="gallery" element={<GalleryPage />} />
+              <Route path="reservations" element={<ReservationsPage />} />
+              <Route path="contact" element={<ContactPage />} />
+              <Route path="careers" element={<CareersPage />} />
+              <Route path="order" element={<OrderPage />} />
+
+              {/* Rutas antiguas en español: se conservan como redirecciones. */}
+              <Route path="menu" element={<Navigate to="/eat" replace />} />
+              <Route path="nosotros" element={<Navigate to="/about" replace />} />
+              <Route path="galeria" element={<Navigate to="/gallery" replace />} />
+              <Route path="reservaciones" element={<Navigate to="/reservations" replace />} />
+              <Route path="pedido" element={<Navigate to="/order" replace />} />
+              <Route path="contacto" element={<Navigate to="/contact" replace />} />
+
               <Route path="*" element={<NotFoundPage />} />
             </Route>
 
@@ -53,6 +68,8 @@ export default function App() {
               <Route path="reservas" element={<AdminReservationsPage />} />
               <Route path="productos" element={<AdminProductsPage />} />
               <Route path="categorias" element={<AdminCategoriesPage />} />
+              <Route path="galeria" element={<AdminGalleryPage />} />
+              <Route path="empleos" element={<AdminCareersPage />} />
               <Route path="clientes" element={<AdminCustomersPage />} />
               <Route path="ajustes" element={<AdminSettingsPage />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />

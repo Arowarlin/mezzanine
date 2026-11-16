@@ -1,141 +1,157 @@
-# Bitácora de fases
+# Bitácora de fases — rediseño local de Mezzanine Rooftop
 
-## FASE 1 — Análisis y arquitectura · completada
+Rama de trabajo: `mezzanine-local-redesign`, creada desde `main` (Casa Veranda). El estado original queda disponible en `main` y en el commit de referencia.
 
-**Inspección realizada**
+## Fase 1 — Auditoría del proyecto existente
 
-- `C:\Users\PC` no contenía ningún proyecto de restaurante. Nada que sobrescribir.
-- Node `v24.13.1`, npm `11.8.0`, git `2.56.0`, VS Code `1.146.0`.
-- No había PostgreSQL ni MySQL como servicio, ni Docker.
-- XAMPP incluía MariaDB 10.4.32, pero su instancia compartida (`C:\xampp\mysql\data`) tiene **páginas Aria corruptas** y bases de otros proyectos (`ventas_catalogo`). Se descartó usarla.
+**Hecho**
+
+- Se inventarió la estructura completa de `client/`, `server/` y `docs/`.
+- Se revisaron páginas públicas, panel administrativo, contextos, componentes, rutas de API, migraciones, seed y configuración.
+- Se identificaron dependencias, scripts de build, reglas de seguridad y puntos de reutilización.
+- Se documentó el estado de la base local (MariaDB en 3307, sin datos de pedidos/reservas).
 
 **Decisiones**
 
-1. Proyecto independiente en `C:\Users\PC\Proyectos\restaurante-web`, repositorio git propio. Sin relación con Trading Lab.
-2. **Instancia MariaDB propia del proyecto**: datos en `.db/data`, puerto `3307`, usuario `restaurante`, base `restaurante_web`. La instancia compartida de XAMPP no se toca.
-3. Monorepo `client/` + `server/`, sin ORM: SQL versionado y consultas parametrizadas explícitas.
-4. Dinero en centavos enteros. Marca provisional **Casa Veranda** centralizada.
-5. Orden de construcción: **datos y API antes que interfaz**, para que ninguna pantalla use datos simulados.
+- Reutilizar la arquitectura React + Express + MariaDB en lugar de crear un proyecto nuevo.
+- Conservar autenticación, validaciones, rate limiting, subida de imágenes y panel existente.
+- Mantener las rutas administrativas en español y pasar el sitio público a inglés.
 
-**Entregables**
+## Fase 2 — Investigación del sitio oficial
 
-- `docs/arquitectura.md` — stack, estructura, modelo de datos, API, seguridad.
-- `package.json` raíz con scripts `dev`, `build`, `test`, `db:*`.
-- `scripts/db.mjs` — arranque/parada/estado de la instancia propia.
-- `.gitignore`, `server/.env.example`.
+**Hecho**
 
-## FASE 2 — Diseño UI/UX · completada
+- Se visitaron portada, lunch, dinner, cocktails, wine, beer, eat-landing, employment y gift.
+- Se verificaron nombre, dirección, teléfono, Instagram, Facebook y sitio oficial.
+- Se extrajeron los 10 cócteles con sus ingredientes, 9 cervezas/sidras y 14 vinos con origen y notas.
+- Se detectó la contradicción de horarios (“Closed Tuesday & Wednesday” vs. “7 days a week, 11am–9pm”).
+- Se documentó que los menús de comida son imágenes no legibles y que no se deben inventar platos ni precios.
 
-**Sistema visual**
+**Decisiones**
 
-- Paleta cálida y caribeña: `cream` (fondo), `ink` (texto), `forest` y `moss` (verdes profundos), `gold`, `clay`, `sand` (neutros).
-- Tipografía editorial: display serif para titulares, sans para interfaz; titulares con cursivas de acento.
-- Componentes propios en `client/src/index.css`: `.container-page`, `.eyebrow`, `.field`, `.label`, `.card`, `.btn-*`, `.admin-table`, utilidades de animación (`Reveal`, `drawer-enter`).
-- Respeto por `prefers-reduced-motion` y foco visible en todos los controles.
+- Marcar horarios como pendientes.
+- Usar listados públicos para nombres de platos y etiquetar precios como pendientes.
+- Usar precios de muestra solo en bebidas, para que el carrito demo funcione.
+- Excluir platos de desayuno no confirmados.
 
-**Entregables**
+## Fase 3 — Diseño
 
-- Tokens y utilidades en `client/src/index.css`.
-- Componentes reutilizables en `client/src/components/ui/` (`Modal`, `SmartImage`, `Spinner`, `StatusBadge`, `Reveal`, `SectionHeading`).
-- `docs/arquitectura.md` ampliado con el mapa de pantallas.
+**Hecho**
 
-## FASE 3 — Frontend · completada
+- Sistema visual: Fraunces + Inter Tight, paleta ink/cream/sand/gold/clay, radios amplios y mucho aire.
+- Header oscuro con el logo original blanco; footer completo; franja de aviso demo.
+- Componentes: `.chip`, `.chip-gold`, `.chip-ember`, `.menu-row`, botones y campos actualizados.
+- Estructura de navegación: Home, Eat, Drink, Gallery, About, Contact, con CTA de reservas y carrito demo.
+- Documentación en `docs/diseno.md`, incluidas las reglas del logo.
 
-**Sitio público** (React 19 + TypeScript + Vite + Tailwind 4 + React Router + Lucide)
+**Archivos**
 
-- `HomePage`: portada, destacados reales, historia, promoción, galería y testimonios.
-- `MenuPage`: búsqueda sin acentos, filtros por categoría y destacados, añadir al carrito.
-- `AboutPage` y `GalleryPage` con visor de imágenes y navegación por teclado.
-- `ReservationsPage`: franjas reales del backend, control de cupo, días cerrados y confirmación con código.
-- `OrderPage`: entrega o recogida, mínimo de entrega, observaciones por plato y enlace de WhatsApp.
-- `ContactPage`: mapa embebido, horario y mensajes directos por WhatsApp o correo.
-- `NotFoundPage`, `PublicLayout`, `SiteHeader`, `SiteFooter`, `Brand`.
-- `CartProvider` persistente en `localStorage`; `SettingsProvider` y `AuthProvider` alimentados por la API.
+- `client/src/index.css`
+- `client/index.html`
+- `client/public/brand/mezzanine-logo-white.png`
+- `client/public/brand/mezzanine-logo-color.jpg`
+- `client/public/robots.txt`, `client/public/sitemap.xml`
+- `docs/diseno.md`
 
-**Verificación**
+## Fase 4 — Frontend público
 
-- `npm --prefix client run build` → `tsc -b` sin errores y build de Vite correcto (~430 kB JS, ~68 kB CSS).
-- Rutas públicas probadas contra la API real en `http://localhost:4000`.
+**Hecho**
 
-## FASE 4 — Backend · completada
+- `HomePage`: hero cinematográfico, experiencia, Eat/Drink, platos destacados, cócteles, galería y ubicación.
+- `EatPage`: pestañas Lunch/Dinner, categorías, imagen ilustrativa por categoría, precios pendientes.
+- `DrinkPage`: cócteles en tarjetas, cerveza y vino en listas agrupadas; precios de muestra.
+- `AboutPage`: contexto de Egg Harbor/Door County, experiencia y aviso demo.
+- `GalleryPage`: filtros, masonry, lightbox con teclado y contador.
+- `ReservationsPage`: formulario demo completo con franjas, cupo, validación y confirmación.
+- `ContactPage`: dirección, teléfono, mapa embebido, horarios pendientes, redes y sitio oficial.
+- `CareersPage`: introducción, cultura, puestos publicados y llamada telefónica.
+- `OrderPage`: carrito demo, solo recogida, solo bebidas con precio, notas por ítem y confirmación.
+- `CartDrawer` y `NotFoundPage` en inglés.
+- Redirecciones de rutas antiguas (`/menu`, `/nosotros`, `/galeria`, etc.).
 
-**API REST** (Node + Express 5 + Zod + JWT + bcryptjs + Multer)
+**Archivos principales**
 
-- Configuración validada con Zod (`server/src/config/env.ts`); `ADMIN_PASSWORD` es obligatorio, sin valor por defecto en el repositorio.
-- Pool `mysql2/promise` con `dateStrings: true` y helpers `query`/`queryOne`/`execute`.
-- Migración `001_init.sql` y seed idempotente (18 ajustes, administrador, 5 categorías, 20 productos, 8 imágenes).
-- Módulos: catálogo público, pedidos, reservas, autenticación, estadísticas, productos, categorías, pedidos admin, reservas admin, clientes, ajustes y subidas.
-- Precios y totales recalculados en el servidor desde la base de datos; snapshots de nombre y precio en cada línea de pedido.
+- `client/src/pages/HomePage.tsx`, `EatPage.tsx`, `DrinkPage.tsx`, `AboutPage.tsx`, `GalleryPage.tsx`, `ReservationsPage.tsx`, `ContactPage.tsx`, `CareersPage.tsx`, `OrderPage.tsx`, `NotFoundPage.tsx`
+- `client/src/components/layout/*`, `client/src/components/menu/ProductCard.tsx`, `client/src/components/cart/CartDrawer.tsx`
+- `client/src/App.tsx`, `client/src/lib/{types,site,format}.ts`, `client/src/context/{SettingsContext,CartContext}.tsx`
 
-**Verificación**
+## Fase 5 — Backend y datos
 
-- `npm --prefix server run build` sin errores.
-- Prueba HTTP completa: login, 18 ajustes, alta/edición/baja de categoría y producto, métricas del dashboard.
+**Hecho**
 
-## FASE 5 — Base de datos · completada
+- Migración `002_mezzanine.sql` con `kind`, `menu_type`, `ingredients`, `origin`, `is_demo`, categoría de galería y tabla de empleos.
+- Seed nuevo: 8 categorías, 58 productos (18 platos duplicados lunch/dinner, 10 cócteles, 9 cervezas, 14 vinos), 8 imágenes, 1 puesto.
+- API pública con filtros por menú, campos nuevos, galería por categoría y empleos.
+- CRUD administrativo de galería y empleos.
+- Ajustes nuevos y validaciones (URLs, email opcional, WhatsApp opcional, `demo_mode`).
+- Pedidos demo: sin WhatsApp, `isDemo`, bloqueo de productos sin precio.
+- Reservas demo: `isDemo` y email del cliente en el panel.
 
-- Instancia propia en `127.0.0.1:3307`, datos en `.db/data`, contraseña de `root` en `.db/root-password.txt` (no versionado).
-- Base `restaurante_web` con `utf8mb4_unicode_ci`, usuario dedicado `restaurante`.
-- Tablas: `users`, `settings`, `categories`, `products`, `gallery_images`, `customers`, `orders`, `order_items`, `reservations`.
-- Índices para búsquedas del panel (código, fecha, estado, teléfono) y claves foráneas con borrado controlado.
-- Dinero en `INT` de centavos; fechas y horas como `DATE`/`TIME`.
+**Archivos**
 
-## FASE 6 — Pedidos y reservas · completada
+- `server/src/db/migrations/002_mezzanine.sql`
+- `server/src/db/seed.ts`
+- `server/src/config/restaurant.ts`
+- `server/src/modules/{catalog,admin-catalog,admin-settings,admin-content,orders,reservations,settings.service}.ts`
+- `server/src/app.ts`
 
-**Pedidos**
+## Fase 6 — Dashboard
 
-- Código legible (`CV-XXXXX`), tipo `delivery`/`pickup`, costo de envío y mínimo leídos de `settings`.
-- Validación de stock lógico (producto disponible), cantidades y observaciones por línea.
-- URL de WhatsApp generada en el servidor con el detalle completo del pedido.
-- Panel: filtros por estado, búsqueda por código/cliente/teléfono, detalle y cambio de estado.
+**Hecho**
 
-**Reservas**
+- Rebranding del panel a Mezzanine, con logo original.
+- Nuevas entradas de navegación: Galería y Empleos.
+- CRUD de galería (`AdminGalleryPage`) y de empleos (`AdminCareersPage`).
+- Productos: tipo de menú, ingredientes/varietal, origen, precio pendiente y marca demo.
+- Categorías: tipo comida/bebida.
+- Ajustes: redes, sitio oficial, nota de horarios, textos de páginas y aviso demo.
+- Pedidos/reservas: email del cliente, `isDemo`, contacto por teléfono en lugar de WhatsApp.
 
-- Franjas generadas desde horario y `slot_minutes`; cupo por `seats_per_slot`; bloqueo de días cerrados y fechas pasadas.
-- Código `RS-XXXXX`, control de asientos disponibles por franja y validación de datos del cliente.
-- Panel: filtros por fecha y estado, búsqueda, detalle y cambio de estado (pendiente, confirmada, en mesa, completada, cancelada, no asistió).
+**Archivos**
 
-**Verificación**
+- `client/src/components/admin/AdminLayout.tsx`
+- `client/src/pages/admin/{AdminGalleryPage,AdminCareersPage,AdminProductsPage,AdminCategoriesPage,AdminSettingsPage,AdminOrdersPage,AdminReservationsPage,AdminCustomersPage,AdminLoginPage}.tsx`
+- `client/src/App.tsx`
 
-- Pedido `CV-93MEG` y reserva `RS-WWRDP` creados por HTTP con totales y cupos correctos; datos de prueba eliminados al cerrar la fase.
+## Fase 7 — Calidad
 
-## FASE 7 — Panel administrativo · completada
+**Pruebas ejecutadas**
 
-**Acceso**
+- `npm --prefix server run build` ✅
+- `npm --prefix client run build` ✅
+- `npm --prefix client run lint` ✅ (solo warnings heredados de patrones de efectos)
+- Migración y seed contra MariaDB 3307 ✅
+- API pública: settings, categorías, productos por menú, galería, empleos ✅
+- Login admin y endpoints protegidos ✅
+- Pedido demo con bebida: 201, `isDemo=true`, `whatsappUrl=null` ✅
+- Pedido con plato sin precio: 400 con detalle ✅
+- Reserva demo en fecha abierta: 201 ✅
+- Render de 11 rutas públicas con Chrome headless ✅
+- QA de layout desktop 1440 y móvil 390: sin overflow, sin imágenes rotas, sin excepciones ✅
+- Render de 9 rutas admin autenticadas: sin overflow ni errores ✅
 
-- `AdminLoginPage` con validación, mostrar/ocultar contraseña y mensajes de error reales.
-- `RequireAuth` protege `/admin/*` y conserva el destino original; `AdminLayout` con navegación lateral, menú móvil, usuario y cierre de sesión.
+**Limitaciones conocidas**
 
-**Módulos**
+- `npm --prefix server run lint` no funciona en el proyecto heredado: el script apunta a `tests/` (no existe) y no hay `eslint.config.*` para ESLint 10. Se dejó constancia; el build de TypeScript sí pasa.
+- No hay navegador visual integrado en el agente; la QA se hizo con Chrome headless (DOM, métricas y capturas), no con inspección visual humana.
+- Las fotos son ilustrativas y deben reemplazarse.
 
-- **Dashboard**: ventas de hoy, pedidos pendientes, reservas y comensales, clientes, serie de 7 días, más vendidos y listas de próximas reservas y últimos pedidos.
-- **Pedidos**: filtros, búsqueda, detalle con líneas, notas y cambio de estado.
-- **Reservas**: filtros por fecha/estado, búsqueda, detalle y cambio de estado.
-- **Productos**: CRUD completo, precio, categoría, orden, destacado, disponibilidad y subida de imagen.
-- **Categorías**: CRUD, orden, visibilidad y conteo de platos.
-- **Clientes**: búsqueda, edición de nombre/correo/notas y contacto por WhatsApp.
-- **Ajustes**: identidad, contacto, moneda, envío, pedido mínimo, horario, franjas, asientos y días cerrados.
+## Fase 8 — Documentación
 
-**Verificación**
+**Hecho**
 
-- Prueba HTTP del panel: login, ajustes, alta/edición/baja de categoría y producto de prueba, métricas. Datos de prueba eliminados.
-- `npm --prefix client run build` correcto tras el panel.
+- `README.md` reescrito para la propuesta Mezzanine.
+- `docs/arquitectura.md` actualizado con modelo de datos, endpoints, demo y ruta a i18n.
+- `docs/diseno.md` con sistema visual y reglas del logo.
+- `docs/datos-pendientes.md` con el inventario completo de datos por confirmar.
+- Este archivo (`docs/fases.md`).
 
-## FASE 8 — Seguridad y pruebas · completada
+## Pendiente antes de publicar
 
-- Contraseñas con bcrypt (coste 12) y comparación de tiempo constante ante correos inexistentes.
-- JWT en cookie `httpOnly`, `sameSite=lax`, expiración configurable y `COOKIE_SECURE` para HTTPS.
-- Validación Zod en toda entrada; rutas administrativas con `requireAuth`.
-- Consultas SQL siempre parametrizadas; identificadores de tabla por listas blancas.
-- Rate limit en login y en escrituras públicas; Helmet y CORS restringido.
-- Subida de imágenes validada por tipo MIME y tamaño máximo.
-- `.env`, `.db/` y `server/public/uploads/*` fuera del repositorio público.
-- Verificado que `/api/admin/stats` sin sesión responde `401`.
-
-## FASE 9 — Optimización y documentación · completada
-
-- Builds de producción de `client` y `server` correctos; el servidor sirve la SPA y la API desde el mismo origen.
-- Imágenes con carga diferida y fallback (`SmartImage`); animaciones solo cuando el usuario las acepta.
-- `README.md` raíz con funcionalidad, stack, instalación, API, seguridad y despliegue.
-- `docs/arquitectura.md` con decisiones, modelo de datos y endpoints; esta bitácora con el detalle por fase.
-- Repositorio público: <https://github.com/Arowarlin/casa-veranda>.
+1. Aprobación del restaurante y de todos los datos marcados como pendientes.
+2. Horarios definitivos.
+3. Menús, descripciones y precios reales.
+4. Correo/WhatsApp y proceso real de reservas y pedidos.
+5. Fotografía oficial autorizada.
+6. Dominio, analítica, privacidad y aviso legal.
+7. Autorización expresa para publicar; hoy todo es local y `noindex`.

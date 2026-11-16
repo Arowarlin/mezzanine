@@ -14,22 +14,33 @@ const imageUrlSchema = z.union([z.string().trim().url('URL de imagen inválida')
 
 const categorySchema = z.object({
   name: z.string().trim().min(2, 'El nombre es obligatorio').max(120),
+  kind: z.enum(['food', 'drink']).optional().default('food'),
   description: z.string().trim().max(1000).optional().default(''),
   imageUrl: imageUrlSchema,
   sortOrder: z.coerce.number().int().min(0).max(9999).optional().default(0),
   isActive: z.boolean().optional().default(true),
 });
 
+const MENU_TYPES = ['lunch', 'dinner', 'cocktails', 'beer', 'wine'] as const;
+
 const productSchema = z.object({
   categoryId: z.coerce.number().int().positive('Selecciona una categoría'),
   name: z.string().trim().min(2, 'El nombre es obligatorio').max(160),
   description: z.string().trim().max(2000).optional().default(''),
+  ingredients: z.string().trim().max(1000).optional().default(''),
+  origin: z.string().trim().max(160).optional().default(''),
   priceCents: z.coerce.number().int().min(0, 'El precio no puede ser negativo').max(100_000_000),
+  menuType: z.union([z.enum(MENU_TYPES), z.literal('')]).nullable().optional(),
   imageUrl: imageUrlSchema,
   isFeatured: z.boolean().optional().default(false),
   isAvailable: z.boolean().optional().default(true),
+  isDemo: z.boolean().optional().default(true),
   sortOrder: z.coerce.number().int().min(0).max(9999).optional().default(0),
 });
+
+function menuTypeValue(value: string | null | undefined): string | null {
+  return value && value.length > 0 ? value : null;
+}
 
 async function uniqueSlug(table: 'categories' | 'products', base: string, ignoreId?: number): Promise<string> {
   const root = slugify(base) || 'item';
@@ -49,6 +60,7 @@ type CategoryRow = {
   id: number;
   name: string;
   slug: string;
+  kind: 'food' | 'drink';
   description: string | null;
   image_url: string | null;
   sort_order: number;
@@ -62,10 +74,14 @@ type ProductRow = {
   name: string;
   slug: string;
   description: string | null;
+  ingredients: string | null;
+  origin: string | null;
   price_cents: number;
   image_url: string | null;
   is_featured: number;
   is_available: number;
+  is_demo: number;
+  menu_type: string | null;
   sort_order: number;
   category_name: string;
 } & RowDataPacket;
@@ -74,6 +90,7 @@ const mapCategory = (row: CategoryRow) => ({
   id: row.id,
   name: row.name,
   slug: row.slug,
+  kind: row.kind,
   description: row.description,
   imageUrl: row.image_url,
   sortOrder: row.sort_order,
@@ -88,10 +105,14 @@ const mapProduct = (row: ProductRow) => ({
   name: row.name,
   slug: row.slug,
   description: row.description,
+  ingredients: row.ingredients,
+  origin: row.origin,
   priceCents: row.price_cents,
   imageUrl: row.image_url,
   isFeatured: row.is_featured === 1,
   isAvailable: row.is_available === 1,
+  isDemo: row.is_demo === 1,
+  menuType: row.menu_type,
   sortOrder: row.sort_order,
 });
 
@@ -99,7 +120,7 @@ adminCatalogRouter.get(
   '/categories',
   asyncHandler(async (_req, res) => {
     const rows = await query<CategoryRow>(
-      `SELECT c.id, c.name, c.slug, c.description, c.image_url, c.sort_order, c.is_active,
+      `SELECT c.id, c.name, c.slug, c.kind, c.description, c.image_url, c.sort_order, c.is_active,
               (SELECT COUNT(*) FROM products p WHERE p.category_id = c.id) AS product_count
        FROM categories c ORDER BY c.sort_order, c.name`,
     );
@@ -113,12 +134,12 @@ adminCatalogRouter.post(
     const data = categorySchema.parse(req.body);
     const slug = await uniqueSlug('categories', data.name);
     const result = await execute(
-      `INSERT INTO categories (name, slug, description, image_url, sort_order, is_active)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [data.name, slug, data.description || null, data.imageUrl || null, data.sortOrder, data.isActive ? 1 : 0],
+      `INSERT INTO categories (name, slug, kind, description, image_url, sort_order, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [data.name, slug, data.kind, data.description || null, data.imageUrl || null, data.sortOrder, data.isActive ? 1 : 0],
     );
     const row = await queryOne<CategoryRow>(
-      `SELECT id, name, slug, description, image_url, sort_order, is_active FROM categories WHERE id = ?`,
+      `SELECT id, name, slug, kind, description, image_url, sort_order, is_active FROM categories WHERE id = ?`,
       [result.insertId],
     );
     res.status(201).json({ category: mapCategory(row!) });
@@ -148,6 +169,10 @@ adminCatalogRouter.patch(
     if (data.description !== undefined) {
       fields.push('description = ?');
       params.push(data.description || null);
+    }
+    if (data.kind !== undefined) {
+      fields.push('kind = ?');
+      params.push(data.kind);
     }
     if (data.imageUrl !== undefined) {
       fields.push('image_url = ?');
@@ -203,8 +228,9 @@ adminCatalogRouter.get(
       params.push(term, term);
     }
     const rows = await query<ProductRow>(
-      `SELECT p.id, p.category_id, p.name, p.slug, p.description, p.price_cents, p.image_url,
-              p.is_featured, p.is_available, p.sort_order, c.name AS category_name
+      `SELECT p.id, p.category_id, p.name, p.slug, p.description, p.ingredients, p.origin,
+              p.price_cents, p.image_url, p.is_featured, p.is_available, p.is_demo, p.menu_type,
+              p.sort_order, c.name AS category_name
        FROM products p JOIN categories c ON c.id = p.category_id
        ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
        ORDER BY c.sort_order, p.sort_order, p.name`,
@@ -226,17 +252,22 @@ adminCatalogRouter.post(
     const slug = await uniqueSlug('products', data.name);
     const result = await execute(
       `INSERT INTO products
-         (category_id, name, slug, description, price_cents, image_url, is_featured, is_available, sort_order)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (category_id, name, slug, description, ingredients, origin, price_cents, menu_type,
+          image_url, is_featured, is_available, is_demo, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         data.categoryId,
         data.name,
         slug,
         data.description || null,
+        data.ingredients || null,
+        data.origin || null,
         data.priceCents,
+        menuTypeValue(data.menuType),
         data.imageUrl || null,
         data.isFeatured ? 1 : 0,
         data.isAvailable ? 1 : 0,
+        data.isDemo ? 1 : 0,
         data.sortOrder,
       ],
     );
@@ -284,6 +315,18 @@ adminCatalogRouter.patch(
       fields.push('description = ?');
       params.push(data.description || null);
     }
+    if (data.ingredients !== undefined) {
+      fields.push('ingredients = ?');
+      params.push(data.ingredients || null);
+    }
+    if (data.origin !== undefined) {
+      fields.push('origin = ?');
+      params.push(data.origin || null);
+    }
+    if (data.menuType !== undefined) {
+      fields.push('menu_type = ?');
+      params.push(menuTypeValue(data.menuType));
+    }
     if (data.priceCents !== undefined) {
       fields.push('price_cents = ?');
       params.push(data.priceCents);
@@ -299,6 +342,10 @@ adminCatalogRouter.patch(
     if (data.isAvailable !== undefined) {
       fields.push('is_available = ?');
       params.push(data.isAvailable ? 1 : 0);
+    }
+    if (data.isDemo !== undefined) {
+      fields.push('is_demo = ?');
+      params.push(data.isDemo ? 1 : 0);
     }
     if (data.sortOrder !== undefined) {
       fields.push('sort_order = ?');

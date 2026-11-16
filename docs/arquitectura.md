@@ -1,116 +1,124 @@
-# Arquitectura — Casa Veranda
+# Arquitectura — Mezzanine Rooftop (demo local)
 
-> Nombre provisional. La marca real se cambia en `server/src/config/restaurant.ts` y en la tabla `settings`.
+Este proyecto reutiliza la arquitectura de Casa Veranda (React 19 + Express 5 + MariaDB) y la adapta a una propuesta local para Mezzanine. No es el sitio oficial y no está conectado a producción.
 
-## 1. Alcance
-
-Sitio público de restaurante + panel administrativo, en un solo repositorio con dos aplicaciones:
-
-| Aplicación | Responsabilidad | Puerto |
-|---|---|---|
-| `client/` | SPA React: Inicio, Menú, Nosotros, Galería, Reservaciones, Pedidos, Contacto, Panel | 5173 (dev) |
-| `server/` | API REST Express + acceso a MariaDB + archivos subidos | 4000 (dev) |
-
-En producción el build del cliente se sirve desde el propio Express (un solo despliegue, un solo dominio, sin CORS).
-
-## 2. Stack
-
-- **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS 4 + Lucide React + React Router.
-- **Backend**: Node.js 24 + Express 5 + TypeScript.
-- **Base de datos**: MariaDB 10.4 (compatible MySQL), instancia **propia del proyecto** en el puerto 3307, datos en `.db/data` (ignorado por git).
-- **Driver**: `mysql2/promise` con pool y **consultas siempre parametrizadas**.
-- **Validación**: Zod en servidor y reutilizada en el cliente.
-- **Autenticación**: JWT firmado, transportado en cookie `httpOnly` + `SameSite=Lax`; contraseñas con `bcryptjs`.
-- **Subidas**: `multer` a disco, validación de tipo y tamaño, nombre generado.
-- **Pruebas**: Vitest + Supertest (API), Vitest + Testing Library (componentes críticos).
-
-Sin ORM: el esquema se versiona en SQL (`server/src/db/migrations`) y las consultas viven en repositorios tipados. Esto mantiene el SQL explícito, portable y fácil de auditar.
-
-## 3. Estructura
+## 1. Capas
 
 ```
-restaurante-web/
-├─ client/
-│  ├─ src/
-│  │  ├─ components/      # UI reutilizable (botones, tarjetas, layout, carrito)
-│  │  ├─ pages/           # una carpeta por página pública
-│  │  ├─ pages/admin/     # login + secciones del panel
-│  │  ├─ context/         # carrito, sesión, notificaciones
-│  │  ├─ lib/             # cliente HTTP, formato de dinero/fechas, marca
-│  │  └─ types/           # tipos compartidos con la API
-│  └─ public/             # imágenes estáticas de marca
-├─ server/
-│  ├─ src/
-│  │  ├─ config/          # entorno validado, datos del restaurante
-│  │  ├─ db/              # pool, migrador, seed, migraciones SQL
-│  │  ├─ modules/         # auth, categorias, productos, pedidos, reservas, clientes, ajustes, subidas, estadisticas
-│  │  ├─ middleware/      # auth, errores, validacion, rate limit, subidas
-│  │  ├─ lib/             # dinero, codigos, fechas, errores HTTP
-│  │  ├─ app.ts           # composicion de Express
-│  │  └─ index.ts         # arranque y apagado ordenado
-│  ├─ public/uploads/     # imagenes subidas (ignoradas por git)
-│  └─ tests/              # pruebas de API
-├─ scripts/db.mjs         # arranca/para la instancia MariaDB del proyecto
-└─ docs/                  # arquitectura y bitacora de fases
+client/  SPA React + TypeScript + Vite + Tailwind 4
+server/  API REST Express 5 + Zod + JWT + MySQL/MariaDB
+docs/    arquitectura, diseño, fases y datos pendientes
 ```
 
-## 4. Modelo de datos
+- **Cliente**: React Router, contextos de ajustes/carrito/auth, componentes de UI reutilizables (`SmartImage`, `Reveal`, `Modal`, `StatusBadge`).
+- **Servidor**: rutas por dominio (`catalog`, `orders`, `reservations`, `admin-*`), validación Zod, pool `mysql2/promise`, migraciones SQL versionadas.
+- **Base de datos**: MariaDB 10.4 en el puerto local 3307 para desarrollo; sin ORM.
 
-Dinero en **enteros de centavos** (`price_cents`, `total_cents`) para evitar errores de coma flotante. Moneda configurable en `settings` (por defecto `DOP`).
+## 2. Modelo de datos
 
-- `users` — administradores: nombre, email único, `password_hash`, rol, activo.
-- `categories` — nombre, slug único, descripción, imagen, orden, activa.
-- `products` — categoría, nombre, slug único, descripción, precio, imagen, destacado, disponible, orden.
-- `customers` — nombre, teléfono (clave natural), email, notas.
-- `orders` — código público único, cliente, tipo (`delivery`/`pickup`), estado, subtotal, envío, total, dirección, notas, fecha deseada.
-- `order_items` — copia congelada de nombre y precio del producto + cantidad + notas.
-- `reservations` — código, cliente, fecha, hora, personas, notas, estado.
-- `gallery_images` — url, título, orden, activa.
-- `settings` — pares clave/valor: marca, teléfono, WhatsApp, dirección, horario, costo de envío, capacidad por franja.
+### Tablas existentes (001)
 
-Los pedidos guardan **snapshot** de nombre y precio: cambiar el menú mañana no altera el historial.
+`users`, `categories`, `products`, `customers`, `orders`, `order_items`, `reservations`, `gallery_images`, `settings`.
 
-## 5. API REST
+### Migración 002 (`002_mezzanine.sql`)
 
-Público:
-- `GET /api/public/settings`
-- `GET /api/public/categories`
-- `GET /api/public/products?q=&category=&featured=&available=`
-- `GET /api/public/gallery`
-- `GET /api/public/reservations/slots?date=YYYY-MM-DD`
-- `POST /api/public/orders`
-- `POST /api/public/reservations`
+| Tabla | Cambio | Motivo |
+| --- | --- | --- |
+| `categories` | `kind ENUM('food','drink')` | Separar cocina y bar |
+| `products` | `menu_type ENUM('lunch','dinner','cocktails','beer','wine')` | Un producto puede pertenecer a un menú concreto |
+| `products` | `ingredients TEXT` | Ingredientes verificados de cócteles o varietal de vino |
+| `products` | `origin VARCHAR(160)` | Brewery/origen del vino |
+| `products` | `is_demo TINYINT(1)` | Marcar contenido de demostración |
+| `products` | índice `(menu_type, is_available)` | Filtros públicos |
+| `gallery_images` | `category VARCHAR(40)` | Filtros de galería (rooftop, space, food, drinks) |
+| `orders` | `is_demo TINYINT(1)` | Pedidos de demostración |
+| `reservations` | `is_demo TINYINT(1)` | Reservas de demostración |
+| nueva `career_openings` | id, title, description, employment_type, sort_order, is_active | Página de empleos editable |
 
-Autenticación:
-- `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/me`
+Todas las columnas usan `ADD COLUMN IF NOT EXISTS` para poder re-ejecutar la migración sin daño. La migración se registra en `schema_migrations`.
 
-Administración (cookie válida + rol):
-- `GET /api/admin/stats`
-- `GET|POST|PATCH|DELETE /api/admin/products[/:id]`
-- `GET|POST|PATCH|DELETE /api/admin/categories[/:id]`
-- `GET /api/admin/orders` · `PATCH /api/admin/orders/:id/status`
-- `GET /api/admin/reservations` · `PATCH /api/admin/reservations/:id/status`
-- `GET /api/admin/customers` · `PATCH /api/admin/customers/:id`
-- `GET|PUT /api/admin/settings`
-- `POST /api/admin/uploads` · `DELETE /api/admin/uploads/:name`
+### Reglas de contenido
 
-## 6. Seguridad
+- Los platos sin precio confirmado usan `price_cents = 0`; la UI muestra “Pricing pending” y el servidor rechaza pedidos con esos productos.
+- Las bebidas usan precios de muestra y `is_demo = 1`.
+- `products.slug` es único; los platos repetidos entre lunch y dinner usan prefijos (`lunch-…`, `dinner-…`).
+- El seed reemplaza catálogo, galería y empleos, pero **conserva** pedidos, reservas, clientes y usuarios.
 
-1. Contraseñas con `bcryptjs` (coste 12). Nunca se devuelve el hash.
-2. JWT en cookie `httpOnly`; el cliente no puede leer el token desde JavaScript.
-3. Middleware `requireAuth` en todo `/api/admin` y `requireRole` donde aplique.
-4. Validación Zod de **todo** cuerpo, query y parámetro antes de tocar la base.
-5. Consultas parametrizadas (`?`) en el 100 % de los accesos; nunca concatenación de SQL.
-6. `helmet`, CORS restringido al origen del cliente, límite de tasa en login y en endpoints públicos de escritura.
-7. Mensajes de error genéricos al cliente; detalle solo en el log del servidor.
-8. Secretos en `.env` (ignorado por git) y `.env.example` sin valores reales.
-9. Subidas: extensión y MIME permitidos, tamaño máximo, nombre aleatorio, sin ejecución.
-10. Apagado ordenado del pool y de la instancia de base de datos.
+## 3. API pública
 
-## 7. Decisiones de diseño
+| Método | Ruta | Notas |
+| --- | --- | --- |
+| `GET` | `/api/public/settings` | Incluye marca, contacto, redes, horarios, avisos demo y textos de páginas |
+| `GET` | `/api/public/categories` | Categorías activas con `kind` |
+| `GET` | `/api/public/products` | Filtros `q`, `category`, `menu`, `featured`, `available`; devuelve `ingredients`, `origin`, `menuType`, `isDemo` |
+| `GET` | `/api/public/gallery` | Filtro opcional `category` |
+| `GET` | `/api/public/careers` | Puestos activos |
+| `GET` | `/api/public/reservations/slots?date=` | Franjas y cupo simulado |
+| `POST` | `/api/public/reservations` | Crea reserva demo (`is_demo`) |
+| `POST` | `/api/public/orders` | Crea pedido demo; solo productos con precio > 0; `whatsappUrl` es `null` en demo |
 
-- **Sin estado de sesión en el cliente**: la sesión se consulta con `GET /api/auth/me`; el panel no parpadea porque hay una pantalla de carga mientras se resuelve.
-- **Un solo dominio en producción**: evita CORS y simplifica cookies.
-- **Códigos públicos legibles** (`CV-8F3K2`) para pedidos y reservas: el cliente puede dictarlos por teléfono.
-- **Disponibilidad real de reservas**: capacidad por franja de 30 minutos calculada en SQL, no en el navegador.
-- **Imágenes**: se guardan en disco y se sirven con caché; el seed usa fotografías remotas de alta calidad y el panel permite sustituirlas.
+## 4. API administrativa
+
+| Método | Ruta | Notas |
+| --- | --- | --- |
+| `POST` | `/api/auth/login` · `logout` · `GET me` | JWT en cookie httpOnly |
+| `GET` | `/api/admin/stats` | Métricas del dashboard |
+| `GET/POST/PATCH/DELETE` | `/api/admin/categories` | Incluye `kind` |
+| `GET/POST/PATCH/DELETE` | `/api/admin/products` | Incluye `menuType`, `ingredients`, `origin`, `isDemo` |
+| `GET/POST/PATCH/DELETE` | `/api/admin/gallery` | CRUD de galería |
+| `GET/POST/PATCH/DELETE` | `/api/admin/careers` | CRUD de empleos |
+| `GET/PATCH` | `/api/admin/orders` · `/api/admin/reservations` | Incluye `isDemo` y email del cliente |
+| `GET/PATCH` | `/api/admin/customers` | Clientes |
+| `GET/PUT` | `/api/admin/settings` | Claves blancas desde `restaurantDefaults` |
+| `POST/DELETE` | `/api/admin/uploads` | Imágenes validadas por tipo/tamaño |
+
+## 5. Claves de ajustes
+
+Se conservan las claves originales y se añaden:
+
+- `facebook`, `official_website`
+- `hours_note`
+- `demo_mode` (`true`/`false`), `demo_notice`
+- `hero_title`, `hero_subtitle`
+- `about_intro`, `careers_intro`
+
+Valores actuales: `currency=USD`, `open_time=11:00`, `close_time=21:00`, `slot_minutes=30`, `seats_per_slot=40`, `closed_days=2,3`, `delivery_fee_cents=0`, `min_order_cents=0`.
+
+## 6. Modo demo
+
+- `demo_mode=true` por defecto.
+- Las reservas y pedidos se guardan con `is_demo=1`.
+- El pedido no genera enlace de WhatsApp si `demo_mode` está activo o si no hay WhatsApp configurado.
+- No hay envío de correo, SMS, pagos ni integraciones.
+- `robots.txt` bloquea indexación y el HTML incluye `noindex, nofollow`.
+- El aviso “Unofficial redesign proposal” aparece en el header y en páginas sensibles.
+
+## 7. Seguridad
+
+- Contraseñas con bcrypt (coste 12).
+- JWT en cookie `httpOnly`, `sameSite=lax`, expiración configurable.
+- Zod en todos los cuerpos y query strings.
+- SQL siempre parametrizado; identificadores de tabla limitados por listas blancas.
+- Rate limiting en login y escrituras públicas.
+- Precios y totales recalculados en el servidor.
+- Helmet, CORS restringido, subida de imágenes validada.
+- `.env` fuera del repositorio.
+
+## 8. Preparación para español
+
+La interfaz pública está en inglés. Los textos de marca viven en `settings` y en `client/src/lib/site.ts`; las rutas nuevas son neutras (`/eat`, `/drink`, `/about`, etc.). Para añadir español:
+
+1. Extraer los textos de `site.ts` y de las páginas a un diccionario (`en`/`es`).
+2. Añadir un `LanguageContext` y un selector en header/footer.
+3. Duplicar las claves de contenido en `settings` (`hero_title_es`, etc.) o crear una tabla `content_translations`.
+4. Mantener las rutas y añadir un prefijo (`/es/...`) o negociación por `Accept-Language`.
+
+No se implementó el selector en esta fase para no añadir complejidad sin contenido traducido aprobado.
+
+## 9. Decisiones y límites
+
+- **No se copiaron fotografías del restaurante**: se usan imágenes de Unsplash y se marcan como ilustrativas.
+- **No se inventaron platos, recetas ni precios**: ver `docs/datos-pendientes.md`.
+- **Los horarios se muestran como pendientes** por la contradicción del sitio oficial.
+- **El correo y WhatsApp públicos no existen**: la UI los oculta en lugar de inventarlos.
+- **El logo es el archivo original**: no se redibuja ni se recolorea.

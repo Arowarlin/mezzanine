@@ -45,8 +45,23 @@ function validateEntry(key: string, raw: string | number): string {
     if (!/^[A-Z]{3}$/.test(value)) throw HttpError.badRequest('La moneda debe ser un código ISO de 3 letras');
     return value;
   }
+  if (key === 'demo_mode') {
+    if (value !== 'true' && value !== 'false') throw HttpError.badRequest('demo_mode debe ser "true" o "false"');
+    return value;
+  }
   if (key === 'whatsapp') {
+    if (value === '') return '';
     if (!/^\d{7,15}$/.test(value)) throw HttpError.badRequest('El WhatsApp debe ser solo dígitos (7 a 15)');
+    return value;
+  }
+  if (key === 'email') {
+    if (value === '') return '';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) throw HttpError.badRequest('El correo no tiene un formato válido');
+    return value;
+  }
+  if (key === 'facebook' || key === 'official_website') {
+    if (value === '') return '';
+    if (!/^https?:\/\/\S+$/i.test(value)) throw HttpError.badRequest(`${key} debe ser una URL que empiece por http:// o https://`);
     return value;
   }
   if (value.length > 1000) throw HttpError.badRequest(`${key} es demasiado largo`);

@@ -41,7 +41,7 @@ export function AdminLoginPage() {
       <div className="relative hidden overflow-hidden bg-ink lg:block">
         <SmartImage
           src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=80"
-          alt="Mesa servida en Casa Veranda"
+          alt="Mesa servida en Mezzanine"
           className="absolute inset-0 h-full w-full"
           imgClassName="h-full w-full object-cover opacity-45"
           eager
@@ -52,14 +52,14 @@ export function AdminLoginPage() {
           <div>
             <p className="eyebrow">Panel administrativo</p>
             <h1 className="mt-4 max-w-md text-balance text-5xl leading-[1.02]">
-              La casa, <em className="text-gold">bajo control</em>.
+              El rooftop, <em className="text-gold">bajo control</em>.
             </h1>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-cream/60">
               Pedidos, reservas, clientes y carta en un solo lugar. Solo el personal autorizado puede entrar.
             </p>
           </div>
           <p className="text-[0.68rem] uppercase tracking-[0.18em] text-cream/30">
-            Santo Domingo · República Dominicana
+            Egg Harbor · Wisconsin
           </p>
         </div>
       </div>
@@ -89,7 +89,7 @@ export function AdminLoginPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className="field pl-11"
-                  placeholder="admin@casaveranda.do"
+                  placeholder="admin@ejemplo.com"
                   required
                 />
               </div>

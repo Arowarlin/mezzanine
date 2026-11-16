@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
+  BriefcaseBusiness,
   CalendarCheck,
   ExternalLink,
+  Images,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -22,6 +24,8 @@ const NAV = [
   { to: '/admin/reservas', label: 'Reservas', icon: CalendarCheck },
   { to: '/admin/productos', label: 'Productos', icon: UtensilsCrossed },
   { to: '/admin/categorias', label: 'Categorías', icon: Tags },
+  { to: '/admin/galeria', label: 'Galería', icon: Images },
+  { to: '/admin/empleos', label: 'Empleos', icon: BriefcaseBusiness },
   { to: '/admin/clientes', label: 'Clientes', icon: Users },
   { to: '/admin/ajustes', label: 'Ajustes', icon: Settings },
 ]
@@ -144,12 +148,12 @@ export function AdminLayout() {
               <Menu className="h-5 w-5" />
             </button>
             <p className="hidden text-[0.68rem] font-bold uppercase tracking-[0.2em] text-ink/35 sm:block">
-              Casa Veranda · Panel
+              Mezzanine · Panel
             </p>
             <div className="ml-auto flex items-center gap-3">
               <span className="hidden text-xs text-ink/45 sm:inline">{user?.email}</span>
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-forest text-xs font-bold uppercase text-cream">
-                {user?.name.slice(0, 2) ?? 'CV'}
+                {user?.name.slice(0, 2) ?? 'MZ'}
               </span>
             </div>
           </div>

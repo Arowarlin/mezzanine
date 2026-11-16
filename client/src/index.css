@@ -1,19 +1,22 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
-  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-sans: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
 
-  --color-ink: #101d19;
-  --color-forest: #1b3a2d;
-  --color-moss: #2f5745;
-  --color-cream: #f7f2e8;
-  --color-sand: #e8dcc8;
-  --color-gold: #c19a5b;
-  --color-clay: #a04b33;
-  --color-line: #ded2bd;
+  --color-ink: #0b1413;
+  --color-harbor: #0f1c1b;
+  --color-forest: #12201f;
+  --color-moss: #1e3b3a;
+  --color-teal: #24504d;
+  --color-cream: #f5f0e8;
+  --color-sand: #e4d9c8;
+  --color-gold: #c9a35c;
+  --color-clay: #c75b39;
+  --color-ember: #c75b39;
+  --color-line: #ddd2c0;
 
-  --shadow-soft: 0 24px 60px -30px rgba(16, 29, 25, 0.45);
+  --shadow-soft: 0 24px 60px -30px rgba(11, 20, 19, 0.5);
 }
 
 @layer base {
@@ -93,6 +96,26 @@
 
   .eyebrow {
     @apply text-[0.7rem] font-bold uppercase tracking-[0.3em] text-gold;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line/80 bg-white/70 px-3 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-ink/55;
+  }
+
+  .chip-gold {
+    @apply border-gold/45 bg-gold/10 text-ink/70;
+  }
+
+  .chip-ember {
+    @apply border-clay/40 bg-clay/10 text-clay;
+  }
+
+  .hairline {
+    @apply border-t border-line/70;
+  }
+
+  .menu-row {
+    @apply flex items-baseline justify-between gap-6 border-b border-line/60 py-5 last:border-b-0;
   }
 
   .link-underline {

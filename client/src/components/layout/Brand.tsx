@@ -5,19 +5,30 @@ type BrandProps = {
   compact?: boolean
 }
 
+/**
+ * Logo original de Mezzanine (archivo oficial proporcionado).
+ * No se redibuja, recolorea ni recorta: solo se ajusta su tamaño.
+ * - light: versión blanca horizontal para fondos oscuros.
+ * - dark: versión a color (lockup con icono) para fondos claros.
+ */
+const LOGOS = {
+  light: { src: '/brand/mezzanine-logo-white.png', width: 750, height: 204 },
+  dark: { src: '/brand/mezzanine-logo-color.jpg', width: 750, height: 422 },
+}
+
 export function Brand({ light = false, compact = false }: BrandProps) {
+  const logo = light ? LOGOS.light : LOGOS.dark
+
   return (
-    <Link to="/" className="group inline-flex items-baseline gap-2" aria-label="Casa Veranda, inicio">
-      <span
-        className={`font-display text-[1.6rem] leading-none tracking-tight transition-colors ${
-          light ? 'text-cream' : 'text-ink'
-        }`}
-      >
-        Casa Veranda
-      </span>
-      {!compact ? (
-        <span className="h-1.5 w-1.5 rounded-full bg-gold transition-transform duration-500 group-hover:scale-150" />
-      ) : null}
+    <Link to="/" className="inline-flex shrink-0 items-center" aria-label="Mezzanine — home">
+      <img
+        src={logo.src}
+        alt="Mezzanine — Door County"
+        width={logo.width}
+        height={logo.height}
+        className={`w-auto object-contain ${compact ? 'h-8 sm:h-9' : 'h-11 sm:h-12'}`}
+        decoding="async"
+      />
     </Link>
   )
 }

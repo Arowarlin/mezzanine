@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Menu, ShoppingBag, X } from 'lucide-react'
+import { CalendarCheck, Menu, Phone, ShoppingBag, X } from 'lucide-react'
 import { NAV_LINKS } from '../../lib/site'
 import { useCart } from '../../context/CartContext'
+import { useSettings } from '../../context/SettingsContext'
 import { Brand } from './Brand'
 
 export function SiteHeader() {
@@ -10,6 +11,7 @@ export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
   const { count, openCart } = useCart()
+  const { settings } = useSettings()
   const isHome = location.pathname === '/'
   const transparent = isHome && !scrolled
 
@@ -31,28 +33,46 @@ export function SiteHeader() {
     }
   }, [mobileOpen])
 
+  const phone = settings?.phone ?? '920-786-7698'
+
   return (
-    <>
-      <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+    <header className="fixed inset-x-0 top-0 z-50">
+      <div className="bg-ink text-cream/65">
+        <div className="container-page flex h-8 items-center justify-between gap-4 text-[0.6rem] font-medium uppercase tracking-[0.18em]">
+          <span className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#4fb3a8]" />
+            Unofficial redesign proposal · local demo
+          </span>
+          <a
+            href={`tel:${phone.replace(/[^\d+]/g, '')}`}
+            className="hidden items-center gap-1.5 transition-colors hover:text-cream sm:flex"
+          >
+            <Phone className="h-3 w-3" />
+            {phone}
+          </a>
+        </div>
+      </div>
+
+      <div
+        className={`text-cream transition-all duration-300 ${
           transparent
-            ? 'bg-gradient-to-b from-ink/55 to-transparent py-5'
-            : 'border-b border-line/60 bg-cream/92 py-3 shadow-[0_10px_30px_-24px_rgba(16,29,25,0.5)] backdrop-blur-md'
+            ? 'bg-gradient-to-b from-ink/80 to-transparent'
+            : 'border-b border-cream/10 bg-ink/95 backdrop-blur'
         }`}
       >
-        <div className="container-page flex items-center justify-between gap-6">
-          <Brand light={transparent} />
+        <div className="container-page flex h-[4.5rem] items-center justify-between gap-4 lg:h-20">
+          <Brand light compact />
 
-          <nav className="hidden items-center gap-8 lg:flex" aria-label="Navegación principal">
+          <nav className="hidden items-center gap-7 lg:flex">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `link-underline text-[0.72rem] font-bold uppercase tracking-[0.18em] transition-colors ${
-                    transparent ? 'text-cream/85 hover:text-cream' : 'text-ink/65 hover:text-ink'
-                  } ${isActive ? (transparent ? 'text-cream' : 'text-ink') : ''}`
+                  `link-underline text-[0.72rem] font-semibold uppercase tracking-[0.16em] transition-colors ${
+                    isActive ? 'text-gold' : 'text-cream/75 hover:text-cream'
+                  }`
                 }
               >
                 {link.label}
@@ -60,84 +80,84 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={openCart}
-              className={`relative rounded-full p-2.5 transition ${
-                transparent ? 'text-cream hover:bg-white/10' : 'text-ink hover:bg-sand'
-              }`}
-              aria-label={`Abrir carrito (${count} artículos)`}
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-cream/25 text-cream transition-colors hover:border-cream/60"
+              aria-label="Open demo pre-order"
             >
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag className="h-4 w-4" />
               {count > 0 ? (
-                <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1 text-[0.62rem] font-bold text-ink">
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-clay px-1 text-[0.6rem] font-bold text-cream">
                   {count}
                 </span>
               ) : null}
             </button>
 
             <Link
-              to="/reservaciones"
-              className={`hidden rounded-full px-5 py-2.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] transition sm:inline-flex ${
-                transparent
-                  ? 'border border-cream/40 text-cream hover:bg-cream hover:text-ink'
-                  : 'bg-forest text-cream hover:bg-moss'
-              }`}
+              to="/reservations"
+              className="hidden items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-ink transition-all hover:-translate-y-0.5 hover:bg-[#d3ac63] sm:inline-flex"
             >
-              Reservar
+              <CalendarCheck className="h-3.5 w-3.5" />
+              Reserve
             </Link>
 
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              className={`rounded-full p-2.5 transition lg:hidden ${
-                transparent ? 'text-cream hover:bg-white/10' : 'text-ink hover:bg-sand'
-              }`}
-              aria-label="Abrir menú"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-cream/25 text-cream lg:hidden"
+              aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
-      </header>
+      </div>
 
       {mobileOpen ? (
-        <div className="fixed inset-0 z-[60] flex flex-col bg-forest text-cream lg:hidden">
-          <div className="container-page flex items-center justify-between py-5">
-            <Brand light />
+        <div className="fixed inset-0 z-[60] flex flex-col bg-ink text-cream lg:hidden">
+          <div className="container-page flex h-[4.5rem] items-center justify-between">
+            <Brand light compact />
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="rounded-full p-2.5 text-cream hover:bg-white/10"
-              aria-label="Cerrar menú"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-cream/25"
+              aria-label="Close menu"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             </button>
           </div>
-          <nav className="container-page flex flex-1 flex-col justify-center gap-1" aria-label="Navegación móvil">
-            {NAV_LINKS.map((link, index) => (
+          <nav className="container-page flex flex-1 flex-col justify-center gap-1 pb-20">
+            {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `border-b border-cream/10 py-4 font-display text-4xl transition-colors ${
-                    isActive ? 'text-gold' : 'text-cream/90 hover:text-gold'
+                  `border-b border-cream/10 py-4 font-display text-3xl transition-colors ${
+                    isActive ? 'text-gold' : 'text-cream/85 hover:text-cream'
                   }`
                 }
-                style={{ animationDelay: `${index * 40}ms` }}
               >
                 {link.label}
               </NavLink>
             ))}
+            <div className="mt-8 grid gap-3">
+              <Link to="/reservations" className="btn-gold w-full">
+                Reserve a table
+              </Link>
+              <Link
+                to="/order"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-cream/25 px-6 py-3 text-[0.8rem] font-bold uppercase tracking-[0.14em] text-cream"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                Demo pre-order
+              </Link>
+            </div>
           </nav>
-          <div className="container-page pb-10 pt-6 text-sm text-cream/60">
-            <p>Calle Gustavo Mejía Ricart 45, Piantini</p>
-            <p className="mt-1">Santo Domingo · República Dominicana</p>
-          </div>
         </div>
       ) : null}
-    </>
+    </header>
   )
 }

@@ -1,31 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  CalendarDays,
-  Check,
-  Clock,
-  Loader2,
-  MessageCircle,
-  Phone,
-  Users,
-  UtensilsCrossed,
-} from 'lucide-react'
+import { CalendarDays, Check, Clock, Info, Loader2, Phone, Users } from 'lucide-react'
 import { api, errorMessage } from '../lib/api'
 import type { ReservationResponse, ReservationSlot } from '../lib/types'
 import { useSettings } from '../context/SettingsContext'
-import { formatDate, todayISO } from '../lib/format'
+import { formatDate, formatTime, todayISO } from '../lib/format'
 import { Reveal } from '../components/ui/Reveal'
-import { SectionHeading } from '../components/ui/SectionHeading'
 import { SmartImage } from '../components/ui/SmartImage'
 import { Spinner } from '../components/ui/Spinner'
-
-const DAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 
 type SlotsResponse = {
   date: string
   closed: boolean
   slots: ReservationSlot[]
 }
+
+const PARTY_SIZES = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12]
 
 function addDaysISO(days: number): string {
   const date = new Date()
@@ -35,66 +25,60 @@ function addDaysISO(days: number): string {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
-function weekdayLabel(date: string): string {
-  return DAY_NAMES[new Date(`${date}T12:00:00`).getDay()] ?? ''
-}
-
 export function ReservationsPage() {
-  const { settings, whatsapp } = useSettings()
-  const [date, setDate] = useState(addDaysISO(1))
+  const { settings } = useSettings()
+  const [date, setDate] = useState(todayISO())
+  const [partySize, setPartySize] = useState(2)
   const [slots, setSlots] = useState<ReservationSlot[]>([])
   const [closed, setClosed] = useState(false)
-  const [slotsLoading, setSlotsLoading] = useState(true)
-  const [slotsError, setSlotsError] = useState('')
-
+  const [loadingSlots, setLoadingSlots] = useState(true)
   const [time, setTime] = useState('')
-  const [partySize, setPartySize] = useState(2)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [formError, setFormError] = useState('')
-  const [confirmation, setConfirmation] = useState<ReservationResponse['reservation'] | null>(null)
+  const [error, setError] = useState('')
+  const [result, setResult] = useState<ReservationResponse['reservation'] | null>(null)
 
   const minDate = todayISO()
-  const maxDate = addDaysISO(90)
+  const maxDate = useMemo(() => addDaysISO(60), [])
 
-  const loadSlots = useCallback((targetDate: string) => {
-    setSlotsLoading(true)
-    setSlotsError('')
+  const loadSlots = useCallback(async (value: string) => {
+    setLoadingSlots(true)
+    setError('')
     setTime('')
-    api<SlotsResponse>(`/api/public/reservations/slots?date=${targetDate}`)
-      .then((data) => {
-        setSlots(data.slots)
-        setClosed(data.closed)
-      })
-      .catch((error) => {
-        setSlots([])
-        setClosed(false)
-        setSlotsError(errorMessage(error))
-      })
-      .finally(() => setSlotsLoading(false))
+    try {
+      const data = await api<SlotsResponse>(`/api/public/reservations/slots?date=${value}`)
+      setSlots(data.slots)
+      setClosed(data.closed)
+    } catch (err) {
+      setSlots([])
+      setClosed(false)
+      setError(errorMessage(err))
+    } finally {
+      setLoadingSlots(false)
+    }
   }, [])
 
   useEffect(() => {
-    loadSlots(date)
+    void loadSlots(date)
   }, [date, loadSlots])
-
-  const availableSlots = useMemo(() => slots.filter((slot) => slot.remaining > 0), [slots])
-
-  const selectedSlot = useMemo(() => slots.find((slot) => slot.time === time) ?? null, [slots, time])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    setFormError('')
+    setError('')
 
     if (!time) {
-      setFormError('Elige una hora disponible.')
+      setError('Choose an available time.')
       return
     }
-    if (selectedSlot && selectedSlot.remaining < partySize) {
-      setFormError(`Esa franja solo tiene ${selectedSlot.remaining} asiento(s). Elige otra hora o reduce el grupo.`)
+    if (name.trim().length < 2) {
+      setError('Enter the name for the reservation.')
+      return
+    }
+    if (phone.trim().length < 7) {
+      setError('Enter a phone number so the restaurant can reach you.')
       return
     }
 
@@ -102,399 +86,282 @@ export function ReservationsPage() {
     try {
       const data = await api<ReservationResponse>('/api/public/reservations', {
         method: 'POST',
-        body: {
-          customer: { name, phone, email: email.trim() ? email : '' },
+        body: JSON.stringify({
+          customer: { name: name.trim(), phone: phone.trim(), email: email.trim() },
           date,
           time,
           partySize,
-          notes: notes.trim() ? notes : undefined,
-        },
+          notes: notes.trim(),
+        }),
       })
-      setConfirmation(data.reservation)
-      setSlots((current) =>
-        current.map((slot) =>
-          slot.time === time ? { ...slot, remaining: Math.max(0, slot.remaining - partySize) } : slot,
-        ),
-      )
-    } catch (error) {
-      setFormError(errorMessage(error))
+      setResult(data.reservation)
+    } catch (err) {
+      setError(errorMessage(err))
     } finally {
       setSubmitting(false)
     }
   }
 
-  const resetForm = () => {
-    setConfirmation(null)
-    setName('')
-    setPhone('')
-    setEmail('')
+  const reset = () => {
+    setResult(null)
+    setTime('')
     setNotes('')
-    setPartySize(2)
-    setFormError('')
-    loadSlots(date)
+    setError('')
   }
-
-  const closedDays = useMemo(() => {
-    const raw = settings?.closed_days ?? '1'
-    return raw
-      .split(',')
-      .map((value) => Number.parseInt(value.trim(), 10))
-      .filter((value) => Number.isInteger(value) && value >= 0 && value <= 6)
-      .map((value) => DAY_NAMES[value])
-      .join(', ')
-  }, [settings?.closed_days])
 
   return (
     <>
-      <section className="relative overflow-hidden bg-forest pb-16 pt-36 text-cream sm:pb-20 sm:pt-44">
+      <section className="relative overflow-hidden bg-ink pb-14 pt-36 text-cream sm:pb-16 sm:pt-44">
         <SmartImage
-          src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1800&q=80"
-          alt="Terraza de Casa Veranda"
+          src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1800&q=80"
+          alt="A table set for dinner"
           className="absolute inset-0 h-full w-full"
-          imgClassName="h-full w-full object-cover opacity-25"
+          imgClassName="h-full w-full object-cover opacity-30"
           eager
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/80 to-forest/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/45" />
         <div className="container-page relative">
-          <p className="eyebrow">Reservaciones</p>
-          <h1 className="mt-4 max-w-3xl text-balance text-5xl leading-[0.98] sm:text-7xl">
-            Aparta tu mesa, <em className="text-gold">sin llamadas</em>
+          <p className="eyebrow">Reservations</p>
+          <h1 className="mt-4 max-w-3xl text-balance text-5xl leading-[0.98] sm:text-6xl lg:text-7xl">
+            Save a <em className="text-gold">table</em>.
           </h1>
-          <p className="mt-5 max-w-xl text-sm leading-relaxed text-cream/65 sm:text-base">
-            Elige el día y la hora, dinos cuántos vienen y te confirmamos por teléfono o WhatsApp.
-            La reserva queda registrada al instante.
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-cream/65">
+            Request a table for lunch or dinner. This is a demonstration: no request reaches the restaurant and no
+            availability is confirmed.
           </p>
         </div>
       </section>
 
-      <section className="container-page py-14 sm:py-20">
-        <div className="grid gap-10 lg:grid-cols-[1fr_0.85fr] lg:gap-16">
-          <div>
-            {confirmation ? (
-              <Reveal>
-                <div className="rounded-3xl border border-gold/40 bg-white/80 p-8 shadow-soft">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-forest text-cream">
-                    <Check className="h-7 w-7" />
-                  </span>
-                  <h2 className="mt-6 text-4xl leading-tight">Mesa apartada</h2>
-                  <p className="mt-3 text-sm leading-relaxed text-ink/60">
-                    Guardamos tu reserva con el código{' '}
-                    <strong className="font-bold text-ink">{confirmation.code}</strong>. Te contactaremos al
-                    teléfono indicado para confirmar.
-                  </p>
-
-                  <dl className="mt-7 grid gap-4 rounded-2xl bg-sand/40 p-5 text-sm sm:grid-cols-2">
-                    <div>
-                      <dt className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-ink/45">Fecha</dt>
-                      <dd className="mt-1 font-semibold">{formatDate(confirmation.date)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-ink/45">Hora</dt>
-                      <dd className="mt-1 font-semibold">{confirmation.time}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-ink/45">Personas</dt>
-                      <dd className="mt-1 font-semibold">{confirmation.partySize}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-ink/45">Código</dt>
-                      <dd className="mt-1 font-semibold tracking-wide">{confirmation.code}</dd>
-                    </div>
-                  </dl>
-
-                  <div className="mt-7 flex flex-wrap gap-3">
-                    <a
-                      href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(
-                        `Hola, acabo de reservar la mesa ${confirmation.code} para el ${confirmation.date} a las ${confirmation.time}.`,
-                      )}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn-primary"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      Confirmar por WhatsApp
-                    </a>
-                    <button type="button" onClick={resetForm} className="btn-ghost text-forest">
-                      Hacer otra reserva
-                    </button>
-                  </div>
+      <section className="container-page grid gap-10 py-14 lg:grid-cols-[1.25fr_0.75fr] lg:gap-14 lg:py-20">
+        <div>
+          {result ? (
+            <Reveal>
+              <div className="rounded-[2rem] border border-line/70 bg-white/60 p-8 sm:p-10">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-moss text-cream">
+                  <Check className="h-5 w-5" />
+                </span>
+                <h2 className="mt-5 text-3xl">Request saved in the demo</h2>
+                <p className="mt-2 text-sm leading-relaxed text-ink/60">
+                  Reference <strong className="text-ink">{result.code}</strong> · {formatDate(result.date)} at{' '}
+                  {formatTime(result.time)} · {result.partySize} guest{result.partySize === 1 ? '' : 's'}.
+                </p>
+                <div className="mt-5 rounded-2xl border border-gold/40 bg-gold/10 p-4 text-xs leading-relaxed text-ink/70">
+                  <strong className="font-semibold">Demo only.</strong> Nothing was sent to Mezzanine and no table is
+                  held. In a real deployment this request would reach the restaurant&apos;s reservation inbox.
                 </div>
-              </Reveal>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div>
-                  <div className="flex flex-wrap items-end justify-between gap-3">
-                    <div>
-                      <p className="eyebrow">Paso 1</p>
-                      <h2 className="mt-2 text-3xl">Elige el día</h2>
-                    </div>
-                    {closedDays ? (
-                      <p className="text-xs text-ink/45">Cerrado: {closedDays}</p>
-                    ) : null}
-                  </div>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="reservation-date" className="label">
-                        Fecha
-                      </label>
-                      <input
-                        id="reservation-date"
-                        type="date"
-                        value={date}
-                        min={minDate}
-                        max={maxDate}
-                        onChange={(event) => {
-                          if (event.target.value) setDate(event.target.value)
-                        }}
-                        className="field"
-                        required
-                      />
-                      <p className="mt-1.5 text-xs capitalize text-ink/45">{weekdayLabel(date)}</p>
-                    </div>
-                    <div>
-                      <label htmlFor="reservation-party" className="label">
-                        Personas
-                      </label>
-                      <div className="relative">
-                        <Users className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/35" />
-                        <select
-                          id="reservation-party"
-                          value={partySize}
-                          onChange={(event) => setPartySize(Number(event.target.value))}
-                          className="field appearance-none pl-11"
-                        >
-                          {Array.from({ length: 12 }, (_, index) => index + 1).map((value) => (
-                            <option key={value} value={value}>
-                              {value} {value === 1 ? 'persona' : 'personas'}
-                            </option>
-                          ))}
-                          <option value={15}>15 personas (grupo)</option>
-                          <option value={20}>20 personas (evento)</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="eyebrow">Paso 2</p>
-                  <h2 className="mt-2 text-3xl">Elige la hora</h2>
-
-                  {slotsLoading ? (
-                    <div className="mt-5 flex items-center gap-3 text-sm text-ink/50">
-                      <Spinner className="h-4 w-4" />
-                      Consultando disponibilidad…
-                    </div>
-                  ) : null}
-
-                  {!slotsLoading && slotsError ? (
-                    <div className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-                      {slotsError}
-                    </div>
-                  ) : null}
-
-                  {!slotsLoading && !slotsError && closed ? (
-                    <div className="mt-5 rounded-xl border border-line bg-sand/40 px-4 py-4 text-sm text-ink/65">
-                      Ese día el restaurante está cerrado. Prueba con otra fecha.
-                    </div>
-                  ) : null}
-
-                  {!slotsLoading && !slotsError && !closed && slots.length === 0 ? (
-                    <div className="mt-5 rounded-xl border border-line bg-sand/40 px-4 py-4 text-sm text-ink/65">
-                      No quedan franjas para ese día. Prueba con otra fecha o escríbenos por WhatsApp.
-                    </div>
-                  ) : null}
-
-                  {!slotsLoading && !slotsError && !closed && slots.length > 0 ? (
-                    <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                      {slots.map((slot) => {
-                        const disabled = slot.remaining < partySize
-                        const active = time === slot.time
-                        return (
-                          <button
-                            key={slot.time}
-                            type="button"
-                            disabled={disabled}
-                            onClick={() => setTime(slot.time)}
-                            className={`rounded-xl border px-2 py-2.5 text-center transition ${
-                              active
-                                ? 'border-forest bg-forest text-cream'
-                                : disabled
-                                  ? 'cursor-not-allowed border-line/60 bg-sand/30 text-ink/25'
-                                  : 'border-line bg-white/70 text-ink/75 hover:border-gold hover:text-ink'
-                            }`}
-                            aria-pressed={active}
-                          >
-                            <span className="block text-sm font-bold">{slot.time}</span>
-                            <span
-                              className={`block text-[0.6rem] uppercase tracking-wide ${
-                                active ? 'text-cream/70' : disabled ? 'text-ink/25' : 'text-ink/40'
-                              }`}
-                            >
-                              {disabled ? 'Sin cupo' : `${slot.remaining} libres`}
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  ) : null}
-
-                  {!slotsLoading && !slotsError && !closed && availableSlots.length === 0 && slots.length > 0 ? (
-                    <p className="mt-3 text-xs text-ink/50">
-                      No hay cupo para {partySize} personas ese día. Reduce el grupo o elige otra fecha.
-                    </p>
-                  ) : null}
-                </div>
-
-                <div>
-                  <p className="eyebrow">Paso 3</p>
-                  <h2 className="mt-2 text-3xl">Tus datos</h2>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="reservation-name" className="label">
-                        Nombre completo
-                      </label>
-                      <input
-                        id="reservation-name"
-                        type="text"
-                        value={name}
-                        onChange={(event) => setName(event.target.value)}
-                        className="field"
-                        placeholder="María Fernández"
-                        minLength={2}
-                        maxLength={120}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="reservation-phone" className="label">
-                        Teléfono
-                      </label>
-                      <input
-                        id="reservation-phone"
-                        type="tel"
-                        value={phone}
-                        onChange={(event) => setPhone(event.target.value)}
-                        className="field"
-                        placeholder="809 555 0000"
-                        minLength={7}
-                        maxLength={30}
-                        required
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label htmlFor="reservation-email" className="label">
-                        Correo <span className="normal-case tracking-normal text-ink/35">(opcional)</span>
-                      </label>
-                      <input
-                        id="reservation-email"
-                        type="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        className="field"
-                        placeholder="tu@correo.com"
-                        maxLength={160}
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label htmlFor="reservation-notes" className="label">
-                        Notas <span className="normal-case tracking-normal text-ink/35">(opcional)</span>
-                      </label>
-                      <textarea
-                        id="reservation-notes"
-                        value={notes}
-                        onChange={(event) => setNotes(event.target.value)}
-                        className="field min-h-24 resize-y"
-                        placeholder="Cumpleaños, alergias, silla para bebé, mesa en la terraza…"
-                        maxLength={500}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {formError ? (
-                  <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-                    {formError}
-                  </div>
-                ) : null}
-
-                <div className="flex flex-wrap items-center gap-4 border-t border-line/70 pt-6">
-                  <button type="submit" disabled={submitting || slotsLoading || closed} className="btn-primary">
-                    {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarDays className="h-4 w-4" />}
-                    {submitting ? 'Guardando…' : 'Confirmar reserva'}
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button type="button" onClick={reset} className="btn-primary">
+                    Make another request
                   </button>
-                  {selectedSlot ? (
-                    <p className="text-sm text-ink/55">
-                      {formatDate(date)} · {time} · {partySize}{' '}
-                      {partySize === 1 ? 'persona' : 'personas'}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-ink/40">Selecciona una hora para continuar</p>
-                  )}
+                  <Link to="/eat" className="btn-ghost text-ink/70">
+                    Browse the menu
+                  </Link>
                 </div>
-              </form>
-            )}
-          </div>
+              </div>
+            </Reveal>
+          ) : (
+            <form onSubmit={handleSubmit} className="rounded-[2rem] border border-line/70 bg-white/55 p-6 sm:p-8">
+              <div className="flex items-center gap-2 text-[0.66rem] font-bold uppercase tracking-[0.18em] text-clay">
+                <CalendarDays className="h-4 w-4" />
+                Request a table
+              </div>
 
-          <aside className="space-y-6">
-            <div className="overflow-hidden rounded-2xl">
-              <SmartImage
-                src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=80"
-                alt="Mesa servida en Casa Veranda"
-                className="aspect-[4/3] w-full"
-                imgClassName="h-full w-full object-cover"
-              />
-            </div>
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="res-date" className="label">
+                    Date
+                  </label>
+                  <input
+                    id="res-date"
+                    type="date"
+                    className="field"
+                    value={date}
+                    min={minDate}
+                    max={maxDate}
+                    onChange={(event) => setDate(event.target.value)}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="res-party" className="label">
+                    Guests
+                  </label>
+                  <div className="relative">
+                    <Users className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/30" />
+                    <select
+                      id="res-party"
+                      className="field appearance-none pl-11"
+                      value={partySize}
+                      onChange={(event) => setPartySize(Number(event.target.value))}
+                    >
+                      {PARTY_SIZES.map((size) => (
+                        <option key={size} value={size}>
+                          {size} {size === 1 ? 'guest' : 'guests'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
 
-            <div className="card p-6">
-              <SectionHeading eyebrow="Antes de venir" title="Lo que debes saber" />
-              <ul className="mt-5 space-y-4 text-sm leading-relaxed text-ink/65">
-                <li className="flex gap-3">
-                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                  <span>
-                    Mantenemos tu mesa por 15 minutos. Si vienes tarde, avísanos por teléfono.
-                  </span>
+              <div className="mt-6">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="label mb-0">Time</span>
+                  {!loadingSlots && !closed ? (
+                    <span className="text-[0.62rem] uppercase tracking-[0.12em] text-ink/35">
+                      {slots.length} slots
+                    </span>
+                  ) : null}
+                </div>
+                {loadingSlots ? (
+                  <div className="flex items-center gap-2 text-sm text-ink/45">
+                    <Spinner className="h-4 w-4" />
+                    Checking the demo calendar…
+                  </div>
+                ) : closed ? (
+                  <div className="rounded-xl border border-clay/25 bg-clay/5 p-4 text-sm text-clay">
+                    The calendar is marked closed on this date. The restaurant&apos;s published hours conflict, so
+                    this schedule is pending confirmation.
+                  </div>
+                ) : slots.length === 0 ? (
+                  <div className="rounded-xl border border-line/70 bg-cream/60 p-4 text-sm text-ink/55">
+                    No slots left for this date. Try another day.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    {slots.map((slot) => {
+                      const disabled = slot.remaining < partySize
+                      return (
+                        <button
+                          key={slot.time}
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => setTime(slot.time)}
+                          className={`rounded-xl border px-2 py-2.5 text-sm transition-colors ${
+                            time === slot.time
+                              ? 'border-ink bg-ink text-cream'
+                              : disabled
+                                ? 'cursor-not-allowed border-line/50 bg-cream/40 text-ink/25'
+                                : 'border-line bg-white/70 text-ink/70 hover:border-ink/40'
+                          }`}
+                        >
+                          {formatTime(slot.time)}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="res-name" className="label">
+                    Name
+                  </label>
+                  <input
+                    id="res-name"
+                    className="field"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    autoComplete="name"
+                    placeholder="Full name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="res-phone" className="label">
+                    Phone
+                  </label>
+                  <input
+                    id="res-phone"
+                    className="field"
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                    autoComplete="tel"
+                    placeholder="(920) 000-0000"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="res-email" className="label">
+                    Email <span className="normal-case tracking-normal text-ink/35">(optional, not sent)</span>
+                  </label>
+                  <input
+                    id="res-email"
+                    type="email"
+                    className="field"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="res-notes" className="label">
+                    Comments
+                  </label>
+                  <textarea
+                    id="res-notes"
+                    className="field min-h-24 resize-y"
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    placeholder="Anniversary, allergies, a seat by the edge…"
+                  />
+                </div>
+              </div>
+
+              {error ? (
+                <p className="mt-5 rounded-xl border border-clay/30 bg-clay/5 px-4 py-3 text-sm text-clay">{error}</p>
+              ) : null}
+
+              <div className="mt-6 flex flex-wrap items-center gap-4">
+                <button type="submit" className="btn-primary" disabled={submitting || closed || slots.length === 0}>
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {submitting ? 'Saving request' : 'Request table'}
+                </button>
+                <p className="flex items-center gap-1.5 text-[0.64rem] uppercase tracking-[0.1em] text-ink/35">
+                  <Info className="h-3.5 w-3.5" />
+                  Demo only — no real booking
+                </p>
+              </div>
+            </form>
+          )}
+        </div>
+
+        <aside className="space-y-5">
+          <div className="overflow-hidden rounded-[2rem] border border-line/70 bg-white/60">
+            <SmartImage
+              src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=80"
+              alt="Evening service"
+              className="aspect-[4/3] w-full"
+              imgClassName="h-full w-full object-cover"
+            />
+            <div className="p-6">
+              <p className="eyebrow">Before you book</p>
+              <ul className="mt-4 space-y-3 text-sm text-ink/60">
+                <li className="flex gap-2.5">
+                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-clay" />
+                  Hours are pending confirmation. The official site shows both “closed Tuesday &amp; Wednesday” and
+                  “7 days a week, 11am–9pm”.
                 </li>
-                <li className="flex gap-3">
-                  <Users className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                  <span>
-                    Grupos de más de 12 personas: escríbenos para coordinar menú y espacio.
-                  </span>
+                <li className="flex gap-2.5">
+                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-clay" />
+                  For a real table, call{' '}
+                  <a href="tel:9207867698" className="font-semibold text-ink hover:text-clay">
+                    {settings?.phone ?? '920-786-7698'}
+                  </a>
+                  .
                 </li>
-                <li className="flex gap-3">
-                  <UtensilsCrossed className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                  <span>
-                    Podemos adaptar platos a alergias y restricciones si lo avisas con antelación.
-                  </span>
-                </li>
-                <li className="flex gap-3">
-                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                  <span>{settings?.phone ?? '+1 809 555 0142'}</span>
+                <li className="flex gap-2.5">
+                  <Users className="mt-0.5 h-4 w-4 shrink-0 text-clay" />
+                  Large parties? Call the restaurant directly so the team can plan the room.
                 </li>
               </ul>
-              <a
-                href={`https://wa.me/${whatsapp}`}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-ghost mt-6 w-full text-forest"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Escribir por WhatsApp
-              </a>
             </div>
+          </div>
 
-            <div className="card p-6">
-              <p className="eyebrow">Dirección</p>
-              <p className="mt-3 font-display text-2xl leading-snug">{settings?.address ?? 'Piantini, Santo Domingo'}</p>
-              <p className="mt-2 text-sm text-ink/55">
-                {settings?.city ?? 'Santo Domingo'}, {settings?.country ?? 'República Dominicana'}
-              </p>
-              <Link to="/contacto" className="link-underline mt-4 inline-block text-[0.7rem] font-bold uppercase tracking-[0.16em] text-forest">
-                Ver mapa y cómo llegar
-              </Link>
-            </div>
-          </aside>
-        </div>
+          <div className="rounded-2xl border border-gold/40 bg-gold/10 p-5 text-xs leading-relaxed text-ink/65">
+            <strong className="font-semibold">Unofficial redesign proposal.</strong> This reservation form is a local
+            demonstration. It does not confirm availability, send email or SMS, or reach Mezzanine.
+          </div>
+        </aside>
       </section>
     </>
   )

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Eye, MessageCircle, RefreshCw, Search, Truck, Store } from 'lucide-react'
+import { Eye, Phone, RefreshCw, Search, Truck, Store } from 'lucide-react'
 import { api, errorMessage } from '../../lib/api'
 import type { AdminOrder, AdminOrderItem, OrderStatus } from '../../lib/types'
 import { useSettings } from '../../context/SettingsContext'
-import { digitsOnly, formatDateTime, formatMoney } from '../../lib/format'
+import { formatDateTime, formatMoney } from '../../lib/format'
 import { PageHeader } from '../../components/admin/PageHeader'
 import { Modal } from '../../components/ui/Modal'
 import { PageLoader, Spinner } from '../../components/ui/Spinner'
@@ -255,15 +255,11 @@ export function AdminOrdersPage() {
           detail ? (
             <div className="flex flex-wrap items-center justify-between gap-3">
               <a
-                href={`https://wa.me/${digitsOnly(detail.order.customer.phone)}?text=${encodeURIComponent(
-                  `Hola ${detail.order.customer.name}, le escribimos de Casa Veranda por su pedido ${detail.order.code}.`,
-                )}`}
-                target="_blank"
-                rel="noreferrer"
+                href={`tel:${detail.order.customer.phone.replace(/[^\d+]/g, '')}`}
                 className="inline-flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-forest/70 transition hover:text-forest"
               >
-                <MessageCircle className="h-4 w-4" />
-                Escribir al cliente
+                <Phone className="h-4 w-4" />
+                Llamar al cliente
               </a>
               <div className="flex items-center gap-2">
                 <select
@@ -307,6 +303,9 @@ export function AdminOrdersPage() {
                 <p className="text-[0.64rem] font-bold uppercase tracking-[0.14em] text-ink/40">Cliente</p>
                 <p className="mt-1 font-semibold">{detail.order.customer.name}</p>
                 <p className="text-xs text-ink/50">{detail.order.customer.phone}</p>
+                {detail.order.customer.email ? (
+                  <p className="text-xs text-ink/50">{detail.order.customer.email}</p>
+                ) : null}
               </div>
               <div>
                 <p className="text-[0.64rem] font-bold uppercase tracking-[0.14em] text-ink/40">Entrega</p>
@@ -323,8 +322,9 @@ export function AdminOrdersPage() {
               </div>
               <div>
                 <p className="text-[0.64rem] font-bold uppercase tracking-[0.14em] text-ink/40">Estado actual</p>
-                <div className="mt-1">
+                <div className="mt-1 flex flex-wrap items-center gap-2">
                   <StatusBadge kind="order" status={detail.order.status} />
+                  {detail.order.isDemo ? <span className="chip chip-ember">Demo</span> : null}
                 </div>
               </div>
             </div>

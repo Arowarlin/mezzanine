@@ -30,23 +30,23 @@ export function CartDrawer() {
     <div className="fixed inset-0 z-[65]">
       <button
         type="button"
-        aria-label="Cerrar carrito"
-        className="absolute inset-0 bg-ink/50 backdrop-blur-sm"
+        aria-label="Close cart"
+        className="absolute inset-0 bg-ink/55 backdrop-blur-sm"
         onClick={closeCart}
       />
       <aside className="drawer-enter absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-cream shadow-soft">
         <header className="flex items-center justify-between border-b border-line/70 px-6 py-5">
           <div>
-            <p className="eyebrow">Tu pedido</p>
+            <p className="eyebrow">Demo pre-order</p>
             <h2 className="mt-1 text-3xl">
-              {count === 0 ? 'Carrito vacío' : `${count} artículo${count === 1 ? '' : 's'}`}
+              {count === 0 ? 'Cart is empty' : `${count} item${count === 1 ? '' : 's'}`}
             </h2>
           </div>
           <button
             type="button"
             onClick={closeCart}
             className="rounded-full p-2 text-ink/50 transition hover:bg-sand hover:text-ink"
-            aria-label="Cerrar"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
@@ -58,10 +58,10 @@ export function CartDrawer() {
               <ShoppingBag className="h-7 w-7" />
             </span>
             <p className="text-sm leading-relaxed text-ink/60">
-              Todavía no has añadido nada. El menú cambia con la pesca del día.
+              Nothing added yet. Drinks carry sample prices in this demo, so they are the only items you can pre-order.
             </p>
-            <Link to="/menu" onClick={closeCart} className="btn-primary">
-              Ver el menú
+            <Link to="/drink" onClick={closeCart} className="btn-primary">
+              Browse the drinks
             </Link>
           </div>
         ) : (
@@ -80,14 +80,14 @@ export function CartDrawer() {
                       <div>
                         <p className="text-sm font-semibold leading-snug">{item.name}</p>
                         <p className="mt-0.5 text-xs text-ink/50">
-                          {formatMoney(item.priceCents, currency)} c/u
+                          {formatMoney(item.priceCents, currency)} each · sample
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => removeItem(item.productId)}
                         className="rounded-full p-1.5 text-ink/35 transition hover:bg-rose-50 hover:text-rose-700"
-                        aria-label={`Quitar ${item.name}`}
+                        aria-label={`Remove ${item.name}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -99,7 +99,7 @@ export function CartDrawer() {
                           type="button"
                           onClick={() => setQuantity(item.productId, item.quantity - 1)}
                           className="rounded-full p-2 text-ink/60 transition hover:text-ink"
-                          aria-label="Restar uno"
+                          aria-label="Decrease quantity"
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
@@ -108,7 +108,7 @@ export function CartDrawer() {
                           type="button"
                           onClick={() => setQuantity(item.productId, item.quantity + 1)}
                           className="rounded-full p-2 text-ink/60 transition hover:text-ink"
-                          aria-label="Sumar uno"
+                          aria-label="Increase quantity"
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </button>
@@ -122,7 +122,7 @@ export function CartDrawer() {
                       type="text"
                       value={item.notes}
                       onChange={(event) => setNotes(item.productId, event.target.value)}
-                      placeholder="Observación para este plato"
+                      placeholder="Note for the bar (optional)"
                       className="mt-3 w-full rounded-lg border border-line/70 bg-white/60 px-3 py-2 text-xs outline-none transition placeholder:text-ink/30 focus:border-gold"
                       maxLength={300}
                     />
@@ -137,10 +137,10 @@ export function CartDrawer() {
                 <span className="text-lg font-bold">{formatMoney(subtotalCents, currency)}</span>
               </div>
               <p className="mt-1 text-[0.68rem] leading-relaxed text-ink/45">
-                El costo de envío se calcula al finalizar. El pedido se guarda y se envía por WhatsApp.
+                Pickup only. This is a demo — no payment, no ticket, and no message is sent to the restaurant.
               </p>
-              <Link to="/pedido" onClick={closeCart} className="btn-primary mt-4 w-full">
-                Finalizar pedido
+              <Link to="/order" onClick={closeCart} className="btn-primary mt-4 w-full">
+                Review demo order
               </Link>
             </footer>
           </>

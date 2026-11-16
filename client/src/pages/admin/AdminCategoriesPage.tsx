@@ -10,6 +10,7 @@ import { SmartImage } from '../../components/ui/SmartImage'
 
 type FormState = {
   name: string
+  kind: 'food' | 'drink'
   description: string
   imageUrl: string
   sortOrder: string
@@ -18,6 +19,7 @@ type FormState = {
 
 const EMPTY_FORM: FormState = {
   name: '',
+  kind: 'food',
   description: '',
   imageUrl: '',
   sortOrder: '0',
@@ -73,6 +75,7 @@ export function AdminCategoriesPage() {
     setEditing(category)
     setForm({
       name: category.name,
+      kind: category.kind,
       description: category.description ?? '',
       imageUrl: category.imageUrl ?? '',
       sortOrder: String(category.sortOrder),
@@ -93,6 +96,7 @@ export function AdminCategoriesPage() {
     setSaving(true)
     const payload = {
       name: form.name.trim(),
+      kind: form.kind,
       description: form.description.trim(),
       imageUrl: form.imageUrl.trim(),
       sortOrder: Number(form.sortOrder) || 0,
@@ -197,7 +201,12 @@ export function AdminCategoriesPage() {
             <div className="p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="truncate text-2xl leading-tight">{category.name}</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="truncate text-2xl leading-tight">{category.name}</h2>
+                <span className="rounded-full bg-sand/70 px-2 py-0.5 text-[0.56rem] font-bold uppercase tracking-wide text-ink/50">
+                  {category.kind === 'drink' ? 'Bebida' : 'Comida'}
+                </span>
+              </div>
                   <p className="mt-0.5 truncate text-xs text-ink/40">/{category.slug}</p>
                 </div>
                 <button
@@ -263,7 +272,7 @@ export function AdminCategoriesPage() {
         }
       >
         <form id="category-form" onSubmit={handleSave} className="space-y-5">
-          <div className="grid gap-4 sm:grid-cols-[1.4fr_0.6fr]">
+          <div className="grid gap-4 sm:grid-cols-[1.2fr_0.8fr_0.6fr]">
             <div>
               <label htmlFor="category-name" className="label">
                 Nombre
@@ -274,10 +283,26 @@ export function AdminCategoriesPage() {
                 value={form.name}
                 onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
                 className="field"
-                placeholder="Entradas"
+                placeholder="Starters"
                 maxLength={120}
                 required
               />
+            </div>
+            <div>
+              <label htmlFor="category-kind" className="label">
+                Tipo
+              </label>
+              <select
+                id="category-kind"
+                value={form.kind}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, kind: event.target.value as FormState['kind'] }))
+                }
+                className="field"
+              >
+                <option value="food">Comida</option>
+                <option value="drink">Bebida</option>
+              </select>
             </div>
             <div>
               <label htmlFor="category-order" className="label">

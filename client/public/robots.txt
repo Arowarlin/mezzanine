@@ -1,0 +1,7 @@
+# Unofficial local redesign proposal for Mezzanine (Egg Harbor, WI).
+# Keep search engines out until the owner authorizes a production launch.
+User-agent: *
+Disallow: /
+
+# Replace with the production domain before launch and remove the noindex meta tag.
+Sitemap: https://mezzanine.example.com/sitemap.xml

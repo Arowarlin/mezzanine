@@ -15,8 +15,8 @@ export const adminReservationsRouter = Router();
 
 const RESERVATION_STATUSES = ['pending', 'confirmed', 'seated', 'completed', 'cancelled', 'no_show'] as const;
 
-const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida (YYYY-MM-DD)');
-const timeSchema = z.string().regex(/^\d{2}:\d{2}$/, 'Hora inválida (HH:MM)');
+const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date (YYYY-MM-DD)');
+const timeSchema = z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time (HH:MM)');
 
 function toMinutes(time: string): number {
   const [hours, minutes] = time.split(':').map(Number);
@@ -40,7 +40,7 @@ function weekdayOf(date: string): number {
 
 function assertRealDate(date: string): void {
   const parsed = new Date(`${date}T12:00:00`);
-  if (Number.isNaN(parsed.getTime())) throw HttpError.badRequest('Fecha inválida');
+  if (Number.isNaN(parsed.getTime())) throw HttpError.badRequest('Invalid date');
 }
 
 type SlotUsageRow = { reservation_time: string; used: number } & RowDataPacket;
@@ -53,10 +53,12 @@ type ReservationRow = {
   party_size: number;
   notes: string | null;
   status: string;
+  is_demo: number;
   created_at: string;
   customer_id: number;
   customer_name: string;
   customer_phone: string;
+  customer_email: string | null;
 } & RowDataPacket;
 
 function mapReservation(row: ReservationRow) {
@@ -68,8 +70,14 @@ function mapReservation(row: ReservationRow) {
     partySize: row.party_size,
     notes: row.notes,
     status: row.status,
+    isDemo: row.is_demo === 1,
     createdAt: row.created_at,
-    customer: { id: row.customer_id, name: row.customer_name, phone: row.customer_phone },
+    customer: {
+      id: row.customer_id,
+      name: row.customer_name,
+      phone: row.customer_phone,
+      email: row.customer_email,
+    },
   };
 }
 
@@ -80,7 +88,7 @@ publicReservationsRouter.get(
     assertRealDate(date);
     const settings = await getRestaurantSettings();
 
-    if (date < localToday()) throw HttpError.badRequest('No se puede reservar en una fecha pasada');
+    if (date < localToday()) throw HttpError.badRequest('Reservations cannot be made for a past date');
     if (settings.closedDays.includes(weekdayOf(date))) {
       res.json({ date, closed: true, slots: [] });
       return;
@@ -115,13 +123,13 @@ publicReservationsRouter.get(
 
 const createReservationSchema = z.object({
   customer: z.object({
-    name: z.string().trim().min(2, 'El nombre es obligatorio').max(120),
-    phone: z.string().trim().min(7, 'El teléfono es obligatorio').max(30),
-    email: z.union([z.string().trim().email('Correo inválido'), z.literal('')]).optional(),
+    name: z.string().trim().min(2, 'Name is required').max(120),
+    phone: z.string().trim().min(7, 'Phone is required').max(30),
+    email: z.union([z.string().trim().email('Invalid email'), z.literal('')]).optional(),
   }),
   date: dateSchema,
   time: timeSchema,
-  partySize: z.coerce.number().int().min(1, 'Mínimo una persona').max(20, 'Máximo 20 personas'),
+  partySize: z.coerce.number().int().min(1, 'Minimum one guest').max(20, 'Maximum 20 guests'),
   notes: z.string().trim().max(500).optional(),
 });
 
@@ -142,7 +150,7 @@ async function upsertCustomer(
     [normalizedPhone],
   );
   const row = rows[0];
-  if (!row) throw new HttpError(500, 'No se pudo registrar el cliente');
+  if (!row) throw new HttpError(500, 'Could not register the customer');
   return row.id;
 }
 
@@ -154,24 +162,24 @@ publicReservationsRouter.post(
     assertRealDate(data.date);
     const settings = await getRestaurantSettings();
 
-    if (data.date < localToday()) throw HttpError.badRequest('No se puede reservar en una fecha pasada');
+    if (data.date < localToday()) throw HttpError.badRequest('Reservations cannot be made for a past date');
     if (settings.closedDays.includes(weekdayOf(data.date))) {
-      throw HttpError.badRequest('El restaurante está cerrado ese día');
+      throw HttpError.badRequest('The restaurant is closed on that date');
     }
 
     const open = toMinutes(settings.openTime);
     const close = toMinutes(settings.closeTime);
     const slot = toMinutes(data.time);
     if (slot < open || slot + settings.slotMinutes > close) {
-      throw HttpError.badRequest(`El horario de reservas es de ${settings.openTime} a ${settings.closeTime}`);
+      throw HttpError.badRequest(`Reservation hours are ${settings.openTime} a ${settings.closeTime}`);
     }
     if ((slot - open) % settings.slotMinutes !== 0) {
-      throw HttpError.badRequest('La hora debe coincidir con una franja disponible');
+      throw HttpError.badRequest('Choose an available time slot');
     }
     if (data.date === localToday()) {
       const now = new Date();
       if (slot <= now.getHours() * 60 + now.getMinutes() + 30) {
-        throw HttpError.badRequest('Elige una hora con al menos 30 minutos de margen');
+        throw HttpError.badRequest('Choose a time at least 30 minutes from now');
       }
     }
 
@@ -184,7 +192,7 @@ publicReservationsRouter.post(
       );
       const usedSeats = usedRows.reduce((sum, row) => sum + row.party_size, 0);
       if (usedSeats + data.partySize > settings.seatsPerSlot) {
-        throw HttpError.conflict('Esa franja ya no tiene cupo suficiente. Elige otra hora.');
+        throw HttpError.conflict('That time slot no longer has enough seats. Choose another time.');
       }
 
       const customerId = await upsertCustomer(connection, data.customer.name, data.customer.phone, data.customer.email);
@@ -196,9 +204,9 @@ publicReservationsRouter.post(
         try {
           const [inserted] = await connection.query<ResultSetHeader>(
             `INSERT INTO reservations
-               (code, customer_id, reservation_date, reservation_time, party_size, notes, status)
-             VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
-            [candidate, customerId, data.date, `${data.time}:00`, data.partySize, data.notes ?? null],
+               (code, customer_id, reservation_date, reservation_time, party_size, notes, status, is_demo)
+             VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`,
+            [candidate, customerId, data.date, `${data.time}:00`, data.partySize, data.notes ?? null, settings.demoMode ? 1 : 0],
           );
           reservationId = inserted.insertId;
           code = candidate;
@@ -208,7 +216,7 @@ publicReservationsRouter.post(
           if (!duplicate) throw error;
         }
       }
-      if (reservationId === 0) throw new HttpError(500, 'No se pudo generar el código de la reserva');
+      if (reservationId === 0) throw new HttpError(500, 'Could not generate the reservation code');
 
       return { reservationId, code };
     });
@@ -259,8 +267,8 @@ adminReservationsRouter.get(
 
     const rows = await query<ReservationRow>(
       `SELECT r.id, r.code, r.reservation_date, r.reservation_time, r.party_size, r.notes,
-              r.status, r.created_at, r.customer_id,
-              c.name AS customer_name, c.phone AS customer_phone
+              r.status, r.is_demo, r.created_at, r.customer_id,
+              c.name AS customer_name, c.phone AS customer_phone, c.email AS customer_email
        FROM reservations r
        JOIN customers c ON c.id = r.customer_id
        ${whereSql}

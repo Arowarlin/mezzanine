@@ -13,8 +13,11 @@ import { SmartImage } from '../../components/ui/SmartImage'
 type FormState = {
   name: string
   categoryId: string
+  menuType: string
   price: string
   description: string
+  ingredients: string
+  origin: string
   imageUrl: string
   isFeatured: boolean
   isAvailable: boolean
@@ -24,13 +27,25 @@ type FormState = {
 const EMPTY_FORM: FormState = {
   name: '',
   categoryId: '',
+  menuType: '',
   price: '',
   description: '',
+  ingredients: '',
+  origin: '',
   imageUrl: '',
   isFeatured: false,
   isAvailable: true,
   sortOrder: '0',
 }
+
+const MENU_TYPES = [
+  { value: '', label: 'Sin tipo de menú' },
+  { value: 'lunch', label: 'Lunch' },
+  { value: 'dinner', label: 'Dinner' },
+  { value: 'cocktails', label: 'Cocktails' },
+  { value: 'beer', label: 'Beer' },
+  { value: 'wine', label: 'Wine' },
+]
 
 export function AdminProductsPage() {
   const { currency } = useSettings()
@@ -105,8 +120,11 @@ export function AdminProductsPage() {
     setForm({
       name: product.name,
       categoryId: String(product.categoryId),
+      menuType: product.menuType ?? '',
       price: (product.priceCents / 100).toFixed(2),
       description: product.description ?? '',
+      ingredients: product.ingredients ?? '',
+      origin: product.origin ?? '',
       imageUrl: product.imageUrl ?? '',
       isFeatured: product.isFeatured,
       isAvailable: product.isAvailable,
@@ -138,7 +156,10 @@ export function AdminProductsPage() {
     const payload = {
       categoryId: Number(form.categoryId),
       name: form.name.trim(),
+      menuType: form.menuType,
       description: form.description.trim(),
+      ingredients: form.ingredients.trim(),
+      origin: form.origin.trim(),
       priceCents: Math.round(priceValue * 100),
       imageUrl: form.imageUrl.trim(),
       isFeatured: form.isFeatured,
@@ -292,8 +313,21 @@ export function AdminProductsPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap text-ink/60">{product.categoryName}</td>
-                  <td className="whitespace-nowrap font-semibold">{formatMoney(product.priceCents, currency)}</td>
+                  <td className="whitespace-nowrap text-ink/60">
+                    {product.categoryName}
+                    {product.menuType ? (
+                      <span className="ml-1.5 rounded-full bg-sand/70 px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wide text-ink/50">
+                        {product.menuType}
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="whitespace-nowrap font-semibold">
+                    {product.priceCents > 0 ? (
+                      formatMoney(product.priceCents, currency)
+                    ) : (
+                      <span className="chip chip-gold">Pendiente</span>
+                    )}
+                  </td>
                   <td>
                     <button
                       type="button"
@@ -417,6 +451,23 @@ export function AdminProductsPage() {
               </select>
             </div>
             <div>
+              <label htmlFor="product-menu-type" className="label">
+                Tipo de menú
+              </label>
+              <select
+                id="product-menu-type"
+                value={form.menuType}
+                onChange={(event) => setForm((current) => ({ ...current, menuType: event.target.value }))}
+                className="field"
+              >
+                {MENU_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label htmlFor="product-price" className="label">
                 Precio ({currency})
               </label>
@@ -458,9 +509,38 @@ export function AdminProductsPage() {
               value={form.description}
               onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
               className="field min-h-24 resize-y"
-              placeholder="Ingredientes, técnica y qué lo hace especial…"
+              placeholder="Notas de cata, estilo de cerveza o descripción del plato…"
               maxLength={2000}
             />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="product-ingredients" className="label">
+                Ingredientes / varietal
+              </label>
+              <textarea
+                id="product-ingredients"
+                value={form.ingredients}
+                onChange={(event) => setForm((current) => ({ ...current, ingredients: event.target.value }))}
+                className="field min-h-20 resize-y"
+                placeholder="Thai basil, blanco tequila, simple syrup, fresh lime…"
+                maxLength={1000}
+              />
+            </div>
+            <div>
+              <label htmlFor="product-origin" className="label">
+                Origen / casa
+              </label>
+              <input
+                id="product-origin"
+                value={form.origin}
+                onChange={(event) => setForm((current) => ({ ...current, origin: event.target.value }))}
+                className="field"
+                placeholder="Founders Brewing Co. · Grand Rapids, Michigan"
+                maxLength={160}
+              />
+            </div>
           </div>
 
           <ImageUploader

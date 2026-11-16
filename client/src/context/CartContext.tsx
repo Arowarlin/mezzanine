@@ -9,7 +9,7 @@ import {
 } from 'react'
 import type { CartItem, Product } from '../lib/types'
 
-const STORAGE_KEY = 'cv_cart_v1'
+const STORAGE_KEY = 'mz_cart_v1'
 
 type CartContextValue = {
   items: CartItem[]
@@ -55,6 +55,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items])
 
   const addItem = useCallback((product: Product, quantity = 1) => {
+    // Los platos sin precio confirmado no se pueden pedir en la demo.
+    if (product.priceCents <= 0) return
     setItems((current) => {
       const existing = current.find((item) => item.productId === product.id)
       if (existing) {

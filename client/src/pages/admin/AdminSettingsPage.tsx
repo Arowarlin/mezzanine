@@ -23,6 +23,8 @@ type FormState = {
   whatsapp: string
   email: string
   instagram: string
+  facebook: string
+  official_website: string
   address: string
   city: string
   country: string
@@ -33,6 +35,13 @@ type FormState = {
   close_time: string
   slot_minutes: string
   seats_per_slot: string
+  hours_note: string
+  demo_mode: string
+  demo_notice: string
+  hero_title: string
+  hero_subtitle: string
+  about_intro: string
+  careers_intro: string
 }
 
 const EMPTY: FormState = {
@@ -43,16 +52,25 @@ const EMPTY: FormState = {
   whatsapp: '',
   email: '',
   instagram: '',
+  facebook: '',
+  official_website: '',
   address: '',
   city: '',
   country: '',
-  currency: 'DOP',
+  currency: 'USD',
   deliveryFee: '0.00',
   minOrder: '0.00',
-  open_time: '12:00',
-  close_time: '23:00',
+  open_time: '11:00',
+  close_time: '21:00',
   slot_minutes: '30',
-  seats_per_slot: '24',
+  seats_per_slot: '40',
+  hours_note: '',
+  demo_mode: 'true',
+  demo_notice: '',
+  hero_title: '',
+  hero_subtitle: '',
+  about_intro: '',
+  careers_intro: '',
 }
 
 function centsToInput(value: string | undefined): string {
@@ -63,7 +81,7 @@ function centsToInput(value: string | undefined): string {
 export function AdminSettingsPage() {
   const { refresh } = useSettings()
   const [form, setForm] = useState<FormState>(EMPTY)
-  const [closedDays, setClosedDays] = useState<string[]>(['1'])
+  const [closedDays, setClosedDays] = useState<string[]>(['2', '3'])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -83,16 +101,25 @@ export function AdminSettingsPage() {
           whatsapp: settings.whatsapp ?? '',
           email: settings.email ?? '',
           instagram: settings.instagram ?? '',
+          facebook: settings.facebook ?? '',
+          official_website: settings.official_website ?? '',
           address: settings.address ?? '',
           city: settings.city ?? '',
           country: settings.country ?? '',
-          currency: settings.currency ?? 'DOP',
+          currency: settings.currency ?? 'USD',
           deliveryFee: centsToInput(settings.delivery_fee_cents),
           minOrder: centsToInput(settings.min_order_cents),
-          open_time: settings.open_time ?? '12:00',
-          close_time: settings.close_time ?? '23:00',
+          open_time: settings.open_time ?? '11:00',
+          close_time: settings.close_time ?? '21:00',
           slot_minutes: settings.slot_minutes ?? '30',
-          seats_per_slot: settings.seats_per_slot ?? '24',
+          seats_per_slot: settings.seats_per_slot ?? '40',
+          hours_note: settings.hours_note ?? '',
+          demo_mode: settings.demo_mode ?? 'true',
+          demo_notice: settings.demo_notice ?? '',
+          hero_title: settings.hero_title ?? '',
+          hero_subtitle: settings.hero_subtitle ?? '',
+          about_intro: settings.about_intro ?? '',
+          careers_intro: settings.careers_intro ?? '',
         })
         setClosedDays(
           (settings.closed_days ?? '')
@@ -133,8 +160,8 @@ export function AdminSettingsPage() {
       setError('Los montos de envío y pedido mínimo deben ser números válidos.')
       return
     }
-    if (!/^\d{7,15}$/.test(form.whatsapp)) {
-      setError('El WhatsApp debe tener solo dígitos, entre 7 y 15.')
+    if (form.whatsapp.trim() && !/^\d{7,15}$/.test(form.whatsapp)) {
+      setError('El WhatsApp debe tener solo dígitos, entre 7 y 15, o quedar vacío.')
       return
     }
 
@@ -148,6 +175,8 @@ export function AdminSettingsPage() {
         whatsapp: form.whatsapp.trim(),
         email: form.email.trim(),
         instagram: form.instagram.trim(),
+        facebook: form.facebook.trim(),
+        official_website: form.official_website.trim(),
         address: form.address.trim(),
         city: form.city.trim(),
         country: form.country.trim(),
@@ -159,6 +188,13 @@ export function AdminSettingsPage() {
         slot_minutes: form.slot_minutes,
         seats_per_slot: form.seats_per_slot,
         closed_days: closedDays.length > 0 ? closedDays.join(',') : '0',
+        hours_note: form.hours_note.trim(),
+        demo_mode: form.demo_mode,
+        demo_notice: form.demo_notice.trim(),
+        hero_title: form.hero_title.trim(),
+        hero_subtitle: form.hero_subtitle.trim(),
+        about_intro: form.about_intro.trim(),
+        careers_intro: form.careers_intro.trim(),
       }
 
       await api<{ settings: Record<string, string> }>('/api/admin/settings', { method: 'PUT', body: payload })
@@ -268,7 +304,7 @@ export function AdminSettingsPage() {
           </div>
           <div>
             <label htmlFor="settings-whatsapp" className="label">
-              WhatsApp (solo dígitos)
+              WhatsApp (solo dígitos, opcional)
             </label>
             <input
               id="settings-whatsapp"
@@ -278,7 +314,7 @@ export function AdminSettingsPage() {
               onChange={(event) => set('whatsapp', event.target.value.replace(/\D/g, ''))}
               className="field"
               maxLength={15}
-              required
+              placeholder="Se deja vacío si no hay WhatsApp público"
             />
           </div>
           <div>
@@ -305,6 +341,34 @@ export function AdminSettingsPage() {
               onChange={(event) => set('instagram', event.target.value)}
               className="field"
               maxLength={80}
+            />
+          </div>
+          <div>
+            <label htmlFor="settings-facebook" className="label">
+              Facebook (URL)
+            </label>
+            <input
+              id="settings-facebook"
+              type="url"
+              value={form.facebook}
+              onChange={(event) => set('facebook', event.target.value)}
+              className="field"
+              maxLength={300}
+              placeholder="https://www.facebook.com/…"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="settings-official" className="label">
+              Sitio oficial (URL)
+            </label>
+            <input
+              id="settings-official"
+              type="url"
+              value={form.official_website}
+              onChange={(event) => set('official_website', event.target.value)}
+              className="field"
+              maxLength={300}
+              placeholder="https://www.mezzaninerooftop.com/"
             />
           </div>
           <div className="sm:col-span-2">
@@ -344,6 +408,19 @@ export function AdminSettingsPage() {
               onChange={(event) => set('country', event.target.value)}
               className="field"
               maxLength={120}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="settings-hours-note" className="label">
+              Nota de horarios
+            </label>
+            <textarea
+              id="settings-hours-note"
+              value={form.hours_note}
+              onChange={(event) => set('hours_note', event.target.value)}
+              className="field min-h-20 resize-y"
+              maxLength={1000}
+              placeholder="Explica cualquier conflicto de horarios antes de confirmarlos…"
             />
           </div>
         </div>
@@ -493,6 +570,96 @@ export function AdminSettingsPage() {
           <p className="mt-2 text-[0.68rem] text-ink/40">
             Los días marcados no aceptan reservas y el sitio lo indica al cliente.
           </p>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-line/70 bg-white/70 p-6">
+        <div className="flex items-center gap-2">
+          <Store className="h-4 w-4 text-gold" />
+          <h2 className="text-2xl">Contenido de páginas</h2>
+        </div>
+        <p className="mt-1 text-xs text-ink/45">
+          Textos de la portada, la página About y Careers. En esta demo conviene mantener el aviso de propuesta no
+          oficial.
+        </p>
+        <div className="mt-5 grid gap-4">
+          <div>
+            <label htmlFor="settings-hero-title" className="label">
+              Titular de la portada
+            </label>
+            <input
+              id="settings-hero-title"
+              type="text"
+              value={form.hero_title}
+              onChange={(event) => set('hero_title', event.target.value)}
+              className="field"
+              maxLength={200}
+            />
+          </div>
+          <div>
+            <label htmlFor="settings-hero-subtitle" className="label">
+              Subtítulo de la portada
+            </label>
+            <textarea
+              id="settings-hero-subtitle"
+              value={form.hero_subtitle}
+              onChange={(event) => set('hero_subtitle', event.target.value)}
+              className="field min-h-20 resize-y"
+              maxLength={500}
+            />
+          </div>
+          <div>
+            <label htmlFor="settings-about-intro" className="label">
+              Introducción de About
+            </label>
+            <textarea
+              id="settings-about-intro"
+              value={form.about_intro}
+              onChange={(event) => set('about_intro', event.target.value)}
+              className="field min-h-24 resize-y"
+              maxLength={1000}
+            />
+          </div>
+          <div>
+            <label htmlFor="settings-careers-intro" className="label">
+              Introducción de Careers
+            </label>
+            <textarea
+              id="settings-careers-intro"
+              value={form.careers_intro}
+              onChange={(event) => set('careers_intro', event.target.value)}
+              className="field min-h-20 resize-y"
+              maxLength={1000}
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-[0.4fr_1fr]">
+            <div>
+              <label htmlFor="settings-demo-mode" className="label">
+                Modo demo
+              </label>
+              <select
+                id="settings-demo-mode"
+                value={form.demo_mode}
+                onChange={(event) => set('demo_mode', event.target.value)}
+                className="field"
+              >
+                <option value="true">Activo</option>
+                <option value="false">Desactivado</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="settings-demo-notice" className="label">
+                Aviso de demostración
+              </label>
+              <textarea
+                id="settings-demo-notice"
+                value={form.demo_notice}
+                onChange={(event) => set('demo_notice', event.target.value)}
+                className="field min-h-20 resize-y"
+                maxLength={1000}
+              />
+            </div>
+          </div>
         </div>
       </section>
 

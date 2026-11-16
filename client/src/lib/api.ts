@@ -38,7 +38,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status, data.error ?? 'No se pudo completar la operación', data.issues)
+    throw new ApiError(response.status, data.error ?? 'The operation could not be completed', data.issues)
   }
 
   return data as T
@@ -52,5 +52,5 @@ export function errorMessage(error: unknown): string {
     return error.message
   }
   if (error instanceof Error) return error.message
-  return 'Ocurrió un error inesperado'
+  return 'Something went wrong. Please try again.'
 }

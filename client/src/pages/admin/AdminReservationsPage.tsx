@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { CalendarDays, Eye, MessageCircle, RefreshCw, Search, Users } from 'lucide-react'
+import { CalendarDays, Eye, Phone, RefreshCw, Search, Users } from 'lucide-react'
 import { api, errorMessage } from '../../lib/api'
 import type { AdminReservation, ReservationStatus } from '../../lib/types'
-import { digitsOnly, formatDate, formatDateTime, todayISO } from '../../lib/format'
+import { formatDate, formatDateTime, todayISO } from '../../lib/format'
 import { PageHeader } from '../../components/admin/PageHeader'
 import { Modal } from '../../components/ui/Modal'
 import { PageLoader, Spinner } from '../../components/ui/Spinner'
@@ -271,15 +271,11 @@ export function AdminReservationsPage() {
           detail ? (
             <div className="flex flex-wrap items-center justify-between gap-3">
               <a
-                href={`https://wa.me/${digitsOnly(detail.customer.phone)}?text=${encodeURIComponent(
-                  `Hola ${detail.customer.name}, le escribimos de Casa Veranda para confirmar su reserva ${detail.code} del ${detail.date} a las ${detail.time}.`,
-                )}`}
-                target="_blank"
-                rel="noreferrer"
+                href={`tel:${detail.customer.phone.replace(/[^\d+]/g, '')}`}
                 className="inline-flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-forest/70 transition hover:text-forest"
               >
-                <MessageCircle className="h-4 w-4" />
-                Confirmar por WhatsApp
+                <Phone className="h-4 w-4" />
+                Llamar al cliente
               </a>
               <div className="flex items-center gap-2">
                 <select
@@ -315,6 +311,9 @@ export function AdminReservationsPage() {
                 <p className="text-[0.64rem] font-bold uppercase tracking-[0.14em] text-ink/40">Cliente</p>
                 <p className="mt-1 font-semibold">{detail.customer.name}</p>
                 <p className="text-xs text-ink/50">{detail.customer.phone}</p>
+                {detail.customer.email ? (
+                  <p className="text-xs text-ink/50">{detail.customer.email}</p>
+                ) : null}
               </div>
               <div>
                 <p className="text-[0.64rem] font-bold uppercase tracking-[0.14em] text-ink/40">Fecha y hora</p>
@@ -327,8 +326,9 @@ export function AdminReservationsPage() {
               </div>
               <div>
                 <p className="text-[0.64rem] font-bold uppercase tracking-[0.14em] text-ink/40">Estado</p>
-                <div className="mt-1">
+                <div className="mt-1 flex flex-wrap items-center gap-2">
                   <StatusBadge kind="reservation" status={detail.status} />
+                  {detail.isDemo ? <span className="chip chip-ember">Demo</span> : null}
                 </div>
               </div>
             </div>

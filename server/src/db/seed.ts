@@ -1,250 +1,566 @@
 import { hash } from 'bcryptjs';
+import type { RowDataPacket } from 'mysql2/promise';
 import { execute, queryOne, closePool } from './pool';
 import { env } from '../config/env';
 import { restaurantDefaults } from '../config/restaurant';
 
+/**
+ * Seed de la propuesta local de Mezzanine Rooftop.
+ *
+ * Reglas de contenido:
+ *  - Solo se siembran platos mencionados en listados públicos (Restaurantji,
+ *    Door County Pulse, Zmenu) o bebidas verificadas en el sitio oficial.
+ *  - Los platos no llevan precio (price_cents = 0) ni descripción inventada:
+ *    la interfaz los muestra como "Pricing pending confirmation".
+ *  - Las bebidas llevan precios de MUESTRA para que el carrito de demostración
+ *    funcione; no son precios reales.
+ *  - Todas las filas del catálogo llevan is_demo = 1.
+ */
+
 const img = (id: string, width = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`;
+
+type ProductSeed = {
+  name: string;
+  slug: string;
+  description: string | null;
+  ingredients: string | null;
+  origin: string | null;
+  priceCents: number;
+  menuType: 'lunch' | 'dinner' | 'cocktails' | 'beer' | 'wine';
+  image: string | null;
+  featured?: boolean;
+  sort: number;
+};
 
 type CategorySeed = {
   name: string;
   slug: string;
+  kind: 'food' | 'drink';
   description: string;
   image: string;
   sort: number;
-  products: Array<{
-    name: string;
-    slug: string;
-    description: string;
-    priceCents: number;
-    image: string;
-    featured?: boolean;
-    sort: number;
-  }>;
+  products: ProductSeed[];
 };
+
+const COCKTAIL_IMAGES = {
+  a: img('photo-1514362545857-3bc16c4c7d1b'),
+  b: img('photo-1470337458703-46ad1756a187'),
+  c: img('photo-1546171753-97d7676e4602'),
+  d: img('photo-1513558161293-cdaf765ed2fd'),
+};
+
+const food = (
+  name: string,
+  slug: string,
+  menuType: 'lunch' | 'dinner',
+  sort: number,
+): ProductSeed => ({
+  name,
+  slug,
+  description: null,
+  ingredients: null,
+  origin: null,
+  priceCents: 0,
+  menuType,
+  image: null,
+  sort,
+});
 
 const categories: CategorySeed[] = [
   {
-    name: 'Entradas',
-    slug: 'entradas',
-    description: 'Para abrir la mesa y compartir sin prisa.',
+    name: 'Starters',
+    slug: 'starters',
+    kind: 'food',
+    description: 'Small plates and openers for the table.',
     image: img('photo-1541529086526-db283c563270'),
     sort: 1,
     products: [
-      {
-        name: 'Croquetas de yuca con mojo',
-        slug: 'croquetas-de-yuca-con-mojo',
-        description: 'Yuca crujiente, mojo de ajo asado y un toque de limón criollo.',
-        priceCents: 42000,
-        image: img('photo-1541529086526-db283c563270'),
-        featured: true,
-        sort: 1,
-      },
-      {
-        name: 'Tostones con guacamole de la casa',
-        slug: 'tostones-con-guacamole',
-        description: 'Plátano verde doble fritura, aguacate, cilantro y ají picante suave.',
-        priceCents: 38000,
-        image: img('photo-1601050690597-df0568f70950'),
-        sort: 2,
-      },
-      {
-        name: 'Ensalada de la veranda',
-        slug: 'ensalada-de-la-veranda',
-        description: 'Hojas de temporada, mango, queso de cabra, almendras tostadas y vinagreta de chinola.',
-        priceCents: 48000,
-        image: img('photo-1512621776951-a57141f2eefd'),
-        sort: 3,
-      },
-      {
-        name: 'Sopa de coco y jengibre',
-        slug: 'sopa-de-coco-y-jengibre',
-        description: 'Crema suave de coco, jengibre fresco y aceite de cilantro.',
-        priceCents: 39000,
-        image: img('photo-1547592166-23ac45744acd'),
-        sort: 4,
-      },
+      food('Whitefish Chowder', 'lunch-whitefish-chowder', 'lunch', 1),
+      food('Whitefish Chowder', 'dinner-whitefish-chowder', 'dinner', 1),
+      food('Cheese Curds', 'lunch-cheese-curds', 'lunch', 2),
+      food('Cheese Curds', 'dinner-cheese-curds', 'dinner', 2),
+      food('Smoked Whitefish Dip', 'lunch-smoked-whitefish-dip', 'lunch', 3),
+      food('Smoked Whitefish Dip', 'dinner-smoked-whitefish-dip', 'dinner', 3),
+      food('Bruschetta', 'lunch-bruschetta', 'lunch', 4),
+      food('Bruschetta', 'dinner-bruschetta', 'dinner', 4),
+      food('Whitefish Cakes', 'dinner-whitefish-cakes', 'dinner', 5),
+      food('Tuna Tacos', 'lunch-tuna-tacos', 'lunch', 6),
+      food('Tuna Tacos', 'dinner-tuna-tacos', 'dinner', 6),
     ],
   },
   {
-    name: 'Platos fuertes',
-    slug: 'platos-fuertes',
-    description: 'Fuego de leña, fondos largos y producto de aquí.',
-    image: img('photo-1544025162-d76694265947'),
+    name: 'Salads',
+    slug: 'salads',
+    kind: 'food',
+    description: 'Greens from the kitchen, sized for a first course or a light meal.',
+    image: img('photo-1512621776951-a57141f2eefd'),
     sort: 2,
     products: [
-      {
-        name: 'Chivo guisado de la casa',
-        slug: 'chivo-guisado-de-la-casa',
-        description: 'Cocción lenta de seis horas, sofrito de la abuela y moro de guandules.',
-        priceCents: 115000,
-        image: img('photo-1544025162-d76694265947'),
-        featured: true,
-        sort: 1,
-      },
-      {
-        name: 'Pollo de campo al carbón',
-        slug: 'pollo-de-campo-al-carton',
-        description: 'Pollo marinado 24 horas, carbón de leña, puré de auyama y jus de hierbas.',
-        priceCents: 89000,
-        image: img('photo-1598103442097-8b74394b95c6'),
-        sort: 2,
-      },
-      {
-        name: 'Mofongo relleno de mariscos',
-        slug: 'mofongo-relleno-de-mariscos',
-        description: 'Plátano majado con chicharrón, camarones y calamar en salsa de coco.',
-        priceCents: 125000,
-        image: img('photo-1540189549336-e6e99c3679fe'),
-        featured: true,
-        sort: 3,
-      },
-      {
-        name: 'Risotto de hongos del bosque',
-        slug: 'risotto-de-hongos',
-        description: 'Arroz carnaroli, hongos salteados, parmesano curado y aceite de trufa.',
-        priceCents: 78000,
-        image: img('photo-1476124369491-e7addf5db371'),
-        sort: 4,
-      },
-      {
-        name: 'Costillas de la veranda',
-        slug: 'costillas-de-la-veranda',
-        description: 'Costillas de cerdo glaseadas en tamarindo, encurtidos y papas rústicas.',
-        priceCents: 105000,
-        image: img('photo-1544025162-d76694265947'),
-        sort: 5,
-      },
+      food('Candied Walnut Salad', 'lunch-candied-walnut-salad', 'lunch', 1),
+      food('Candied Walnut Salad', 'dinner-candied-walnut-salad', 'dinner', 1),
     ],
   },
   {
-    name: 'Del mar',
-    slug: 'del-mar',
-    description: 'Pescado fresco del día, sin adornos de más.',
-    image: img('photo-1467003909585-2f8a72700288'),
+    name: 'Sandwiches',
+    slug: 'sandwiches',
+    kind: 'food',
+    description: 'Lunch plates with a Door County point of view.',
+    image: img('photo-1551218808-94e220e084d2'),
     sort: 3,
     products: [
-      {
-        name: 'Pescado del día a la plancha',
-        slug: 'pescado-del-dia',
-        description: 'Según la pesca del día, con vegetales al wok y beurre blanc de limón.',
-        priceCents: 110000,
-        image: img('photo-1467003909585-2f8a72700288'),
-        featured: true,
-        sort: 1,
-      },
-      {
-        name: 'Camarones al ajillo',
-        slug: 'camarones-al-ajillo',
-        description: 'Camarones jumbo, ajo confitado, guindilla y pan de masa madre.',
-        priceCents: 129000,
-        image: img('photo-1565680018434-b513d5e5fd47'),
-        sort: 2,
-      },
-      {
-        name: 'Pulpo a la brasa',
-        slug: 'pulpo-a-la-brasa',
-        description: 'Pulpo cocido a baja temperatura, brasa de leña, papas aplastadas y pimentón.',
-        priceCents: 145000,
-        image: img('photo-1544552866-d3ed42536cfd'),
-        sort: 3,
-      },
-      {
-        name: 'Salmón con puré de batata',
-        slug: 'salmon-con-pure-de-batata',
-        description: 'Salmón sellado, puré de batata, espárragos y salsa de mantequilla de cítricos.',
-        priceCents: 119000,
-        image: img('photo-1519708227418-c8fd9a32b7a2'),
-        sort: 4,
-      },
+      food('Pastrami Reuben', 'lunch-pastrami-reuben', 'lunch', 1),
+      food('Mezzanine Burger', 'lunch-mezzanine-burger', 'lunch', 2),
+      food('Mezzanine Burger', 'dinner-mezzanine-burger', 'dinner', 2),
+      food('Pulled Pork Sandwich', 'lunch-pulled-pork-sandwich', 'lunch', 3),
+      food('Smoked Whitefish Bagel', 'lunch-smoked-whitefish-bagel', 'lunch', 4),
+      food('Shrimp Wrap', 'lunch-shrimp-wrap', 'lunch', 5),
     ],
   },
   {
-    name: 'Postres',
-    slug: 'postres',
-    description: 'El final que se recuerda.',
-    image: img('photo-1551024506-0bccd828d307'),
+    name: 'Mains',
+    slug: 'mains',
+    kind: 'food',
+    description: 'Larger plates for dinner on the roof.',
+    image: img('photo-1544025162-d76694265947'),
     sort: 4,
     products: [
+      food('Mushroom Linguine', 'dinner-mushroom-linguine', 'dinner', 1),
+      food('Pesto Linguine', 'dinner-pesto-linguine', 'dinner', 2),
+      food('Pan Fried Whitefish', 'dinner-pan-fried-whitefish', 'dinner', 3),
+      food('Pork Chop', 'dinner-pork-chop', 'dinner', 4),
+      food('Tenderloin', 'dinner-tenderloin', 'dinner', 5),
+    ],
+  },
+  {
+    name: 'Desserts',
+    slug: 'desserts',
+    kind: 'food',
+    description: 'A sweet finish, if you are staying a little longer.',
+    image: img('photo-1551024506-0bccd828d307'),
+    sort: 5,
+    products: [food('Lavender Crème Brûlée', 'dinner-lavender-creme-brulee', 'dinner', 1)],
+  },
+  {
+    name: 'Handcrafted Cocktails',
+    slug: 'handcrafted-cocktails',
+    kind: 'drink',
+    description:
+      'Cocktails built on fresh citrus, house infusions, and garden herbs. Ingredient lists are taken from the official menu; prices are sample values for this demo.',
+    image: COCKTAIL_IMAGES.a,
+    sort: 6,
+    products: [
       {
-        name: 'Tres leches de coco',
-        slug: 'tres-leches-de-coco',
-        description: 'Bizcocho esponjoso, tres leches infusionadas con coco y merengue tostado.',
-        priceCents: 32000,
-        image: img('photo-1578985545062-69928b1d9587'),
+        name: 'Thai Basil Margarita',
+        slug: 'thai-basil-margarita',
+        description: null,
+        ingredients: 'Thai basil, blanco tequila, simple syrup, fresh lime.',
+        origin: null,
+        priceCents: 1400,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.a,
         featured: true,
         sort: 1,
       },
       {
-        name: 'Chocolate 70% con sal de mar',
-        slug: 'chocolate-70-con-sal-de-mar',
-        description: 'Mousse de chocolate amargo, ganache y flor de sal.',
-        priceCents: 35000,
-        image: img('photo-1551024506-0bccd828d307'),
+        name: 'Yolanda Be Cool',
+        slug: 'yolanda-be-cool',
+        description: null,
+        ingredients: 'Vodka, strawberry-infused blanco tequila, habanero tincture, lime, simple syrup.',
+        origin: null,
+        priceCents: 1500,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.b,
+        featured: true,
         sort: 2,
       },
       {
-        name: 'Flan de café',
-        slug: 'flan-de-cafe',
-        description: 'Flan sedoso, café de la casa y caramelo oscuro.',
-        priceCents: 30000,
-        image: img('photo-1529042410759-befb1204b468'),
+        name: 'Guava: A Love Story',
+        slug: 'guava-a-love-story',
+        description: null,
+        ingredients: 'Guava-ginger infused blanco tequila, simple syrup, lime, edible flowers.',
+        origin: null,
+        priceCents: 1500,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.c,
+        featured: true,
         sort: 3,
+      },
+      {
+        name: 'Watermelon Cilantro Margarita',
+        slug: 'watermelon-cilantro-margarita',
+        description: null,
+        ingredients: 'Watermelon juice, cilantro-infused tequila, lime, simple syrup.',
+        origin: null,
+        priceCents: 1400,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.d,
+        sort: 4,
+      },
+      {
+        name: 'Cherry Mule',
+        slug: 'cherry-mule',
+        description: null,
+        ingredients: 'Door County cherry juice, vodka, lime, ginger beer.',
+        origin: null,
+        priceCents: 1300,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.a,
+        sort: 5,
+      },
+      {
+        name: 'Watermelon Cucumber Cooler',
+        slug: 'watermelon-cucumber-cooler',
+        description: null,
+        ingredients: 'House watermelon and cucumber infused vodka, lime, simple syrup, seltzer.',
+        origin: null,
+        priceCents: 1300,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.b,
+        sort: 6,
+      },
+      {
+        name: 'Supper Club Old Fashioned',
+        slug: 'supper-club-old-fashioned',
+        description: null,
+        ingredients: 'Brandy, muddled orange and cherry, simple syrup, house bitters, sweet or sour wash.',
+        origin: null,
+        priceCents: 1400,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.c,
+        featured: true,
+        sort: 7,
+      },
+      {
+        name: 'Raspberry Mint Mojito',
+        slug: 'raspberry-mint-mojito',
+        description: null,
+        ingredients: 'Raspberry-infused white rum, mint, simple syrup, lime, seltzer.',
+        origin: null,
+        priceCents: 1300,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.d,
+        sort: 8,
+      },
+      {
+        name: 'Lavender Lemon Drop Martini',
+        slug: 'lavender-lemon-drop-martini',
+        description: null,
+        ingredients: 'House lavender infused vodka, lemon, simple syrup, sugar rim.',
+        origin: null,
+        priceCents: 1500,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.a,
+        sort: 9,
+      },
+      {
+        name: 'Lavender Gin Fizz',
+        slug: 'lavender-gin-fizz',
+        description: null,
+        ingredients: 'Lavender-infused gin, lemon, simple syrup, seltzer.',
+        origin: null,
+        priceCents: 1400,
+        menuType: 'cocktails',
+        image: COCKTAIL_IMAGES.b,
+        sort: 10,
       },
     ],
   },
   {
-    name: 'Bebidas',
-    slug: 'bebidas',
-    description: 'Coctelería de autor, jugos naturales y café.',
-    image: img('photo-1514362545857-3bc16c4c7d1b'),
-    sort: 5,
+    name: 'Beer & Cider',
+    slug: 'beer-cider',
+    kind: 'drink',
+    description:
+      'A short list of Wisconsin and Midwest beer and cider. Styles and origins are taken from the official menu; prices are sample values for this demo.',
+    image: img('photo-1513558161293-cdaf765ed2fd'),
+    sort: 7,
     products: [
       {
-        name: 'Jugo de chinola',
-        slug: 'jugo-de-chinola',
-        description: 'Chinola fresca, un toque de lima y hielo.',
-        priceCents: 18000,
-        image: img('photo-1546171753-97d7676e4602'),
+        name: 'Narragansett',
+        slug: 'narragansett',
+        description: 'Pilsner',
+        ingredients: null,
+        origin: 'Narragansett Brewing Co. · Rhode Island',
+        priceCents: 600,
+        menuType: 'beer',
+        image: null,
         sort: 1,
       },
       {
-        name: 'Limonada de jengibre',
-        slug: 'limonada-de-jengibre',
-        description: 'Limón criollo, jengibre fresco y miel de la montaña.',
-        priceCents: 16000,
-        image: img('photo-1513558161293-cdaf765ed2fd'),
+        name: 'All Day IPA',
+        slug: 'all-day-ipa',
+        description: 'Session IPA',
+        ingredients: null,
+        origin: 'Founders Brewing Co. · Grand Rapids, Michigan',
+        priceCents: 700,
+        menuType: 'beer',
+        image: null,
         sort: 2,
       },
       {
-        name: 'Café de la casa',
-        slug: 'cafe-de-la-casa',
-        description: 'Grano de Jarabacoa, tostado medio, servido en V60.',
-        priceCents: 12000,
-        image: img('photo-1495474472287-4d71bcdd2085'),
+        name: 'Chaos Pattern',
+        slug: 'chaos-pattern',
+        description: 'Hazy IPA',
+        ingredients: null,
+        origin: '3 Sheeps Brewing · Sheboygan, Wisconsin',
+        priceCents: 800,
+        menuType: 'beer',
+        image: null,
         sort: 3,
       },
       {
-        name: 'Agua de coco',
-        slug: 'agua-de-coco',
-        description: 'Coco verde servido al momento.',
-        priceCents: 15000,
-        image: img('photo-1550258987-190a2d41a8ba'),
+        name: 'Honey Blonde',
+        slug: 'honey-blonde',
+        description: 'Cream ale',
+        ingredients: null,
+        origin: 'Central Waters Brewing · Amherst, Wisconsin',
+        priceCents: 700,
+        menuType: 'beer',
+        image: null,
         sort: 4,
+      },
+      {
+        name: 'Little Sister',
+        slug: 'little-sister',
+        description: 'Wheat ale',
+        ingredients: null,
+        origin: 'Door County Brewing Co. · Wisconsin',
+        priceCents: 700,
+        menuType: 'beer',
+        image: null,
+        sort: 5,
+      },
+      {
+        name: 'Ouisconsing',
+        slug: 'ouisconsing',
+        description: 'Amber / red ale',
+        ingredients: null,
+        origin: 'Central Waters Brewing · Amherst, Wisconsin',
+        priceCents: 700,
+        menuType: 'beer',
+        image: null,
+        sort: 6,
+      },
+      {
+        name: 'Cherry Wheat',
+        slug: 'cherry-wheat',
+        description: 'Wheat ale',
+        ingredients: null,
+        origin: 'Hinterland Brewery · Green Bay, Wisconsin',
+        priceCents: 700,
+        menuType: 'beer',
+        image: null,
+        sort: 7,
+      },
+      {
+        name: 'Cherry Lager',
+        slug: 'cherry-lager',
+        description: 'Fruited lager',
+        ingredients: null,
+        origin: 'One Barrel Brewing · Door County, Wisconsin',
+        priceCents: 700,
+        menuType: 'beer',
+        image: null,
+        sort: 8,
+      },
+      {
+        name: 'Island Orchard Cider',
+        slug: 'island-orchard-cider',
+        description: 'Cider',
+        ingredients: null,
+        origin: 'Island Orchard Cidery · Ellison Bay, Wisconsin',
+        priceCents: 800,
+        menuType: 'beer',
+        image: null,
+        sort: 9,
+      },
+    ],
+  },
+  {
+    name: 'Wine',
+    slug: 'wine',
+    kind: 'drink',
+    description:
+      'Rosé and bubbly, white, and red by the glass or bottle. Origins and tasting notes are taken from the official menu; prices are sample values for this demo.',
+    image: img('photo-1470337458703-46ad1756a187'),
+    sort: 8,
+    products: [
+      {
+        name: 'Door 44 Petite Rosé',
+        slug: 'door-44-petite-rose',
+        description: null,
+        ingredients: 'Rosé',
+        origin: 'Door 44 Winery · Sturgeon Bay, Wisconsin',
+        priceCents: 1200,
+        menuType: 'wine',
+        image: null,
+        sort: 1,
+      },
+      {
+        name: "L'Agnostique Rosé",
+        slug: 'lagnostique-rose',
+        description: 'Dry',
+        ingredients: 'Rosé',
+        origin: 'France',
+        priceCents: 1200,
+        menuType: 'wine',
+        image: null,
+        sort: 2,
+      },
+      {
+        name: 'Los Monteros Cava',
+        slug: 'los-monteros-cava',
+        description: 'Sparkling',
+        ingredients: 'Cava',
+        origin: 'Spain',
+        priceCents: 1300,
+        menuType: 'wine',
+        image: null,
+        sort: 3,
+      },
+      {
+        name: 'Innocent Bystander Sauvignon Blanc',
+        slug: 'innocent-bystander-sauvignon-blanc',
+        description: null,
+        ingredients: 'Sauvignon Blanc',
+        origin: 'Marlborough, New Zealand',
+        priceCents: 1300,
+        menuType: 'wine',
+        image: null,
+        sort: 4,
+      },
+      {
+        name: 'Freixenet Pinot Grigio',
+        slug: 'freixenet-pinot-grigio',
+        description: null,
+        ingredients: 'Pinot Grigio',
+        origin: 'Barcelona, Spain',
+        priceCents: 1100,
+        menuType: 'wine',
+        image: null,
+        sort: 5,
+      },
+      {
+        name: 'Austin Hope Chardonnay',
+        slug: 'austin-hope-chardonnay',
+        description: 'Assertive oak',
+        ingredients: 'Chardonnay',
+        origin: 'Paso Robles, California',
+        priceCents: 1800,
+        menuType: 'wine',
+        image: null,
+        sort: 6,
+      },
+      {
+        name: 'Bulletin Place Chardonnay',
+        slug: 'bulletin-place-chardonnay',
+        description: 'Light oak',
+        ingredients: 'Chardonnay',
+        origin: 'Barossa, Australia',
+        priceCents: 1400,
+        menuType: 'wine',
+        image: null,
+        sort: 7,
+      },
+      {
+        name: 'Tarrica Riesling',
+        slug: 'tarrica-riesling',
+        description: null,
+        ingredients: 'Riesling',
+        origin: 'Monterey, California',
+        priceCents: 1200,
+        menuType: 'wine',
+        image: null,
+        sort: 8,
+      },
+      {
+        name: 'Don Rodolfo Pinot Noir',
+        slug: 'don-rodolfo-pinot-noir',
+        description: null,
+        ingredients: 'Pinot Noir',
+        origin: 'Mendoza, Argentina',
+        priceCents: 1300,
+        menuType: 'wine',
+        image: null,
+        sort: 9,
+      },
+      {
+        name: 'Casa Santos Lima Red Blend',
+        slug: 'casa-santos-lima-red-blend',
+        description: null,
+        ingredients: 'Red blend',
+        origin: 'Lisboa, Portugal',
+        priceCents: 1200,
+        menuType: 'wine',
+        image: null,
+        sort: 10,
+      },
+      {
+        name: 'Treana Cabernet',
+        slug: 'treana-cabernet',
+        description: null,
+        ingredients: 'Cabernet Sauvignon',
+        origin: 'Paso Robles, California',
+        priceCents: 1800,
+        menuType: 'wine',
+        image: null,
+        sort: 11,
+      },
+      {
+        name: 'Ernesto Padrillos Catena Malbec',
+        slug: 'ernesto-padrillos-catena-malbec',
+        description: null,
+        ingredients: 'Malbec',
+        origin: 'Mendoza, Argentina',
+        priceCents: 1600,
+        menuType: 'wine',
+        image: null,
+        sort: 12,
+      },
+      {
+        name: 'True Myth Cabernet',
+        slug: 'true-myth-cabernet',
+        description: null,
+        ingredients: 'Cabernet Sauvignon',
+        origin: 'Paso Robles, California',
+        priceCents: 1500,
+        menuType: 'wine',
+        image: null,
+        sort: 13,
+      },
+      {
+        name: 'Mesta Tempranillo',
+        slug: 'mesta-tempranillo',
+        description: null,
+        ingredients: 'Tempranillo',
+        origin: 'Castilla, Spain',
+        priceCents: 1300,
+        menuType: 'wine',
+        image: null,
+        sort: 14,
       },
     ],
   },
 ];
 
-const gallery = [
-  { url: img('photo-1517248135467-4c7edcad34c4'), title: 'El comedor' },
-  { url: img('photo-1552566626-52f8b828add9'), title: 'La barra' },
-  { url: img('photo-1414235077428-338989a2e8c0'), title: 'Servicio de noche' },
-  { url: img('photo-1559339352-11d035aa65de'), title: 'Mesa preparada' },
-  { url: img('photo-1551218808-94e220e084d2'), title: 'Del fuego' },
-  { url: img('photo-1504674900247-0877df9cc836'), title: 'Para compartir' },
-  { url: img('photo-1476224203421-9ac39bcb3327'), title: 'Producto del día' },
-  { url: img('photo-1470337458703-46ad1756a187'), title: 'Coctelería' },
+const gallery: Array<{ url: string; title: string; category: string }> = [
+  { url: img('photo-1517248135467-4c7edcad34c4'), title: 'The dining room', category: 'rooftop' },
+  { url: img('photo-1552566626-52f8b828add9'), title: 'The bar', category: 'rooftop' },
+  { url: img('photo-1414235077428-338989a2e8c0'), title: 'Evening service', category: 'rooftop' },
+  { url: img('photo-1559339352-11d035aa65de'), title: 'A table set for dinner', category: 'space' },
+  { url: img('photo-1551218808-94e220e084d2'), title: 'From the kitchen', category: 'food' },
+  { url: img('photo-1504674900247-0877df9cc836'), title: 'Plates for the table', category: 'food' },
+  { url: img('photo-1476224203421-9ac39bcb3327'), title: 'Seasonal produce', category: 'food' },
+  { url: img('photo-1470337458703-46ad1756a187'), title: 'Behind the bar', category: 'drinks' },
+];
+
+const careers: Array<{ title: string; description: string; employmentType: string }> = [
+  {
+    title: 'All positions',
+    description:
+      'Mezzanine is hiring for all positions. Tell us what you do best — front of house, kitchen, or bar — and we will point you to the right role.',
+    employmentType: 'full_time',
+  },
 ];
 
 async function seedSettings() {
@@ -259,10 +575,9 @@ async function seedSettings() {
 }
 
 async function seedAdmin() {
-  const existing = await queryOne<{ id: number } & import('mysql2/promise').RowDataPacket>(
-    'SELECT id FROM users WHERE email = ?',
-    [env.ADMIN_EMAIL],
-  );
+  const existing = await queryOne<{ id: number } & RowDataPacket>('SELECT id FROM users WHERE email = ?', [
+    env.ADMIN_EMAIL,
+  ]);
   if (existing) {
     console.log(`  admin: ya existe ${env.ADMIN_EMAIL} (no se cambia la contraseña)`);
     return;
@@ -278,36 +593,37 @@ async function seedAdmin() {
 }
 
 async function seedMenu() {
+  // El catálogo es de demostración: se reemplaza entero. Los pedidos y reservas
+  // existentes se conservan; order_items.product_id queda en NULL por la FK.
+  await execute('DELETE FROM products');
+  await execute('DELETE FROM categories');
+
   for (const category of categories) {
     await execute(
-      `INSERT INTO categories (name, slug, description, image_url, sort_order, is_active)
-       VALUES (?, ?, ?, ?, ?, 1)
-       ON DUPLICATE KEY UPDATE
-         name = VALUES(name), description = VALUES(description),
-         image_url = VALUES(image_url), sort_order = VALUES(sort_order)`,
-      [category.name, category.slug, category.description, category.image, category.sort],
+      `INSERT INTO categories (name, slug, kind, description, image_url, sort_order, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, 1)`,
+      [category.name, category.slug, category.kind, category.description, category.image, category.sort],
     );
-    const row = await queryOne<{ id: number } & import('mysql2/promise').RowDataPacket>(
-      'SELECT id FROM categories WHERE slug = ?',
-      [category.slug],
-    );
+    const row = await queryOne<{ id: number } & RowDataPacket>('SELECT id FROM categories WHERE slug = ?', [
+      category.slug,
+    ]);
     if (!row) throw new Error(`No se pudo leer la categoría ${category.slug}`);
 
     for (const product of category.products) {
       await execute(
         `INSERT INTO products
-           (category_id, name, slug, description, price_cents, image_url, is_featured, is_available, sort_order)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)
-         ON DUPLICATE KEY UPDATE
-           category_id = VALUES(category_id), name = VALUES(name), description = VALUES(description),
-           price_cents = VALUES(price_cents), image_url = VALUES(image_url),
-           is_featured = VALUES(is_featured), sort_order = VALUES(sort_order)`,
+           (category_id, name, slug, description, ingredients, origin, price_cents, menu_type,
+            image_url, is_featured, is_available, is_demo, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?)`,
         [
           row.id,
           product.name,
           product.slug,
           product.description,
+          product.ingredients,
+          product.origin,
           product.priceCents,
+          product.menuType,
           product.image,
           product.featured ? 1 : 0,
           product.sort,
@@ -315,34 +631,41 @@ async function seedMenu() {
       );
     }
   }
+
   const total = categories.reduce((sum, category) => sum + category.products.length, 0);
-  console.log(`  menú: ${categories.length} categorías, ${total} productos`);
+  console.log(`  menú: ${categories.length} categorías, ${total} productos (todos demo)`);
 }
 
 async function seedGallery() {
-  const existing = await queryOne<{ total: number } & import('mysql2/promise').RowDataPacket>(
-    'SELECT COUNT(*) AS total FROM gallery_images',
-  );
-  if (existing && Number(existing.total) > 0) {
-    console.log('  galería: ya tiene imágenes (no se duplican)');
-    return;
-  }
+  await execute('DELETE FROM gallery_images');
   for (const [index, item] of gallery.entries()) {
-    await execute('INSERT INTO gallery_images (url, title, sort_order, is_active) VALUES (?, ?, ?, 1)', [
-      item.url,
-      item.title,
-      index + 1,
-    ]);
+    await execute(
+      'INSERT INTO gallery_images (url, title, category, sort_order, is_active) VALUES (?, ?, ?, ?, 1)',
+      [item.url, item.title, item.category, index + 1],
+    );
   }
   console.log(`  galería: ${gallery.length} imágenes`);
 }
 
+async function seedCareers() {
+  await execute('DELETE FROM career_openings');
+  for (const [index, item] of careers.entries()) {
+    await execute(
+      `INSERT INTO career_openings (title, description, employment_type, sort_order, is_active)
+       VALUES (?, ?, ?, ?, 1)`,
+      [item.title, item.description, item.employmentType, index + 1],
+    );
+  }
+  console.log(`  empleos: ${careers.length} puestos`);
+}
+
 async function main() {
-  console.log('Sembrando datos de Casa Veranda...');
+  console.log('Sembrando datos de Mezzanine Rooftop (demo local)...');
   await seedSettings();
   await seedAdmin();
   await seedMenu();
   await seedGallery();
+  await seedCareers();
   console.log('\nSeed completado.');
 }
 

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { MessageCircle, Pencil, RefreshCw, Search } from 'lucide-react'
+import { Phone, Pencil, RefreshCw, Search } from 'lucide-react'
 import { api, errorMessage } from '../../lib/api'
 import type { AdminCustomer } from '../../lib/types'
 import { useSettings } from '../../context/SettingsContext'
-import { digitsOnly, formatDateTime, formatMoney } from '../../lib/format'
+import { formatDateTime, formatMoney } from '../../lib/format'
 import { PageHeader } from '../../components/admin/PageHeader'
 import { Modal } from '../../components/ui/Modal'
 import { PageLoader, Spinner } from '../../components/ui/Spinner'
@@ -166,15 +166,11 @@ export function AdminCustomersPage() {
                     <td>
                       <div className="flex justify-end gap-1">
                         <a
-                          href={`https://wa.me/${digitsOnly(customer.phone)}?text=${encodeURIComponent(
-                            `Hola ${customer.name}, le escribimos de Casa Veranda.`,
-                          )}`}
-                          target="_blank"
-                          rel="noreferrer"
+                          href={`tel:${customer.phone.replace(/[^\d+]/g, '')}`}
                           className="rounded-lg p-2 text-ink/45 transition hover:bg-emerald-50 hover:text-emerald-700"
-                          aria-label={`Escribir a ${customer.name}`}
+                          aria-label={`Llamar a ${customer.name}`}
                         >
-                          <MessageCircle className="h-4 w-4" />
+                          <Phone className="h-4 w-4" />
                         </a>
                         <button
                           type="button"

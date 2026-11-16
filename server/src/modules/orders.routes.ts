@@ -18,9 +18,9 @@ const ORDER_STATUSES = ['pending', 'confirmed', 'preparing', 'ready', 'completed
 const orderSchema = z
   .object({
     customer: z.object({
-      name: z.string().trim().min(2, 'El nombre es obligatorio').max(120),
-      phone: z.string().trim().min(7, 'El teléfono es obligatorio').max(30),
-      email: z.union([z.string().trim().email('Correo inválido'), z.literal('')]).optional(),
+      name: z.string().trim().min(2, 'Name is required').max(120),
+      phone: z.string().trim().min(7, 'Phone is required').max(30),
+      email: z.union([z.string().trim().email('Invalid email'), z.literal('')]).optional(),
     }),
     type: z.enum(['delivery', 'pickup']),
     address: z.string().trim().max(300).optional(),
@@ -33,11 +33,11 @@ const orderSchema = z
           notes: z.string().trim().max(300).optional(),
         }),
       )
-      .min(1, 'El pedido debe tener al menos un producto')
+      .min(1, 'The order needs at least one item')
       .max(50),
   })
   .refine((data) => data.type !== 'delivery' || (data.address && data.address.length >= 8), {
-    message: 'La dirección es obligatoria para entrega a domicilio',
+    message: 'Address is required for delivery',
     path: ['address'],
   });
 
@@ -55,6 +55,7 @@ type OrderRow = {
   code: string;
   type: 'delivery' | 'pickup';
   status: string;
+  is_demo: number;
   subtotal_cents: number;
   delivery_fee_cents: number;
   total_cents: number;
@@ -64,6 +65,7 @@ type OrderRow = {
   customer_id: number;
   customer_name: string;
   customer_phone: string;
+  customer_email: string | null;
 } & RowDataPacket;
 
 type OrderItemRow = {
@@ -96,7 +98,7 @@ async function upsertCustomer(
     normalizedPhone,
   ]);
   const row = rows[0];
-  if (!row) throw new HttpError(500, 'No se pudo registrar el cliente');
+  if (!row) throw new HttpError(500, 'Could not register the customer');
   return row.id;
 }
 
@@ -106,13 +108,19 @@ function mapOrder(row: OrderRow) {
     code: row.code,
     type: row.type,
     status: row.status,
+    isDemo: row.is_demo === 1,
     subtotalCents: row.subtotal_cents,
     deliveryFeeCents: row.delivery_fee_cents,
     totalCents: row.total_cents,
     address: row.address,
     notes: row.notes,
     createdAt: row.created_at,
-    customer: { id: row.customer_id, name: row.customer_name, phone: row.customer_phone },
+    customer: {
+      id: row.customer_id,
+      name: row.customer_name,
+      phone: row.customer_phone,
+      email: row.customer_email,
+    },
   };
 }
 
@@ -132,14 +140,20 @@ publicOrdersRouter.post(
 
     const missing = data.items.filter((item) => !byId.has(item.productId));
     if (missing.length > 0) {
-      throw HttpError.badRequest('Alguno de los productos del pedido ya no existe', {
+      throw HttpError.badRequest('One of the items is no longer available', {
         productIds: missing.map((item) => item.productId),
       });
     }
     const unavailable = data.items.filter((item) => byId.get(item.productId)!.is_available !== 1);
     if (unavailable.length > 0) {
-      throw HttpError.badRequest('Alguno de los productos del pedido no está disponible ahora mismo', {
+      throw HttpError.badRequest('One of the items is not available right now', {
         productIds: unavailable.map((item) => item.productId),
+      });
+    }
+    const unpriced = data.items.filter((item) => byId.get(item.productId)!.price_cents <= 0);
+    if (unpriced.length > 0) {
+      throw HttpError.badRequest('Some items do not have a confirmed price yet and cannot be ordered', {
+        productIds: unpriced.map((item) => item.productId),
       });
     }
 
@@ -160,7 +174,7 @@ publicOrdersRouter.post(
 
     if (data.type === 'delivery' && settings.minOrderCents > 0 && subtotalCents < settings.minOrderCents) {
       throw HttpError.badRequest(
-        `El pedido mínimo para entrega es ${formatMoney(settings.minOrderCents, settings.currency)}`,
+        `The delivery minimum is ${formatMoney(settings.minOrderCents, settings.currency)}`,
       );
     }
 
@@ -177,16 +191,17 @@ publicOrdersRouter.post(
       let orderId = 0;
       let code = '';
       for (let attempt = 0; attempt < 6 && orderId === 0; attempt += 1) {
-        const candidate = publicCode('CV');
+        const candidate = publicCode('MZ');
         try {
           const [inserted] = await connection.query<ResultSetHeader>(
             `INSERT INTO orders
-               (code, customer_id, type, subtotal_cents, delivery_fee_cents, total_cents, address, notes)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+               (code, customer_id, type, is_demo, subtotal_cents, delivery_fee_cents, total_cents, address, notes)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               candidate,
               customerId,
               data.type,
+              settings.demoMode ? 1 : 0,
               subtotalCents,
               deliveryFeeCents,
               totalCents,
@@ -200,7 +215,7 @@ publicOrdersRouter.post(
           if (!isDuplicateKey(error)) throw error;
         }
       }
-      if (orderId === 0) throw new HttpError(500, 'No se pudo generar el código del pedido');
+      if (orderId === 0) throw new HttpError(500, 'Could not generate the order code');
 
       for (const line of lines) {
         await connection.query(
@@ -215,28 +230,30 @@ publicOrdersRouter.post(
     });
 
     const messageLines = [
-      `Hola ${settings.name}, acabo de hacer el pedido ${result.code}.`,
-      `Tipo: ${data.type === 'delivery' ? 'Entrega a domicilio' : 'Recogida en el restaurante'}`,
-      `Cliente: ${data.customer.name}`,
-      `Teléfono: ${digitsOnly(data.customer.phone)}`,
+      `Hello ${settings.name}, I just placed order ${result.code}.`,
+      `Type: ${data.type === 'delivery' ? 'Delivery' : 'Pickup'}`,
+      `Guest: ${data.customer.name}`,
+      `Phone: ${digitsOnly(data.customer.phone)}`,
     ];
-    if (data.type === 'delivery') messageLines.push(`Dirección: ${data.address}`);
-    messageLines.push('', 'Detalle:');
+    if (data.type === 'delivery') messageLines.push(`Address: ${data.address}`);
+    messageLines.push('', 'Order:');
     for (const line of lines) {
       messageLines.push(`• ${line.quantity} × ${line.name} — ${formatMoney(line.lineTotalCents, settings.currency)}`);
     }
     messageLines.push(
       '',
       `Subtotal: ${formatMoney(subtotalCents, settings.currency)}`,
-      `Envío: ${formatMoney(deliveryFeeCents, settings.currency)}`,
+      `Delivery: ${formatMoney(deliveryFeeCents, settings.currency)}`,
       `Total: ${formatMoney(totalCents, settings.currency)}`,
     );
-    if (data.notes) messageLines.push(`Notas: ${data.notes}`);
-    messageLines.push('', 'Quedo pendiente de la confirmación. ¡Gracias!');
+    if (data.notes) messageLines.push(`Notes: ${data.notes}`);
 
-    const whatsappUrl = `https://wa.me/${digitsOnly(settings.whatsapp)}?text=${encodeURIComponent(
-      messageLines.join('\n'),
-    )}`;
+    // En modo demo no se envía nada a nadie: no hay enlace de WhatsApp real.
+    const whatsappDigits = digitsOnly(settings.whatsapp);
+    const whatsappUrl =
+      !settings.demoMode && whatsappDigits.length >= 7
+        ? `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(messageLines.join('\n'))}`
+        : null;
 
     res.status(201).json({
       order: {
@@ -246,6 +263,7 @@ publicOrdersRouter.post(
         deliveryFeeCents,
         totalCents,
         type: data.type,
+        isDemo: settings.demoMode,
       },
       whatsappUrl,
     });
@@ -280,9 +298,9 @@ adminOrdersRouter.get(
 
     const whereSql = where.length > 0 ? `WHERE ${where.join(' AND ')}` : '';
     const rows = await query<OrderRow>(
-      `SELECT o.id, o.code, o.type, o.status, o.subtotal_cents, o.delivery_fee_cents, o.total_cents,
+      `SELECT o.id, o.code, o.type, o.status, o.is_demo, o.subtotal_cents, o.delivery_fee_cents, o.total_cents,
               o.address, o.notes, o.created_at, o.customer_id,
-              c.name AS customer_name, c.phone AS customer_phone
+              c.name AS customer_name, c.phone AS customer_phone, c.email AS customer_email
        FROM orders o
        JOIN customers c ON c.id = o.customer_id
        ${whereSql}
@@ -307,9 +325,9 @@ adminOrdersRouter.get(
     if (!Number.isInteger(id) || id <= 0) throw HttpError.badRequest('Identificador inválido');
 
     const order = await queryOne<OrderRow>(
-      `SELECT o.id, o.code, o.type, o.status, o.subtotal_cents, o.delivery_fee_cents, o.total_cents,
+      `SELECT o.id, o.code, o.type, o.status, o.is_demo, o.subtotal_cents, o.delivery_fee_cents, o.total_cents,
               o.address, o.notes, o.created_at, o.customer_id,
-              c.name AS customer_name, c.phone AS customer_phone
+              c.name AS customer_name, c.phone AS customer_phone, c.email AS customer_email
        FROM orders o JOIN customers c ON c.id = o.customer_id
        WHERE o.id = ? LIMIT 1`,
       [id],

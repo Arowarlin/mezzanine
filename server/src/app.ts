@@ -17,6 +17,7 @@ import { adminCatalogRouter } from './modules/admin-catalog.routes';
 import { adminCustomersRouter } from './modules/admin-customers.routes';
 import { adminStatsRouter } from './modules/admin-stats.routes';
 import { adminSettingsRouter } from './modules/admin-settings.routes';
+import { adminContentRouter } from './modules/admin-content.routes';
 import { adminUploadsRouter } from './modules/admin-uploads.routes';
 
 export function createApp() {
@@ -36,7 +37,7 @@ export function createApp() {
           fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
           scriptSrc: ["'self'"],
           connectSrc: ["'self'"],
-          frameSrc: ["'self'", 'https://www.google.com'],
+          frameSrc: ["'self'", 'https://www.google.com', 'https://maps.google.com'],
         },
       },
       crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -74,6 +75,7 @@ export function createApp() {
   app.use('/api/admin', adminCustomersRouter);
   app.use('/api/admin', adminStatsRouter);
   app.use('/api/admin', adminSettingsRouter);
+  app.use('/api/admin', adminContentRouter);
   app.use('/api/admin/uploads', adminUploadsRouter);
 
   if (env.isProduction) {

@@ -1,8 +1,8 @@
 {
-  "name": "casa-veranda-server",
+  "name": "mezzanine-rooftop-server",
   "version": "0.1.0",
   "private": true,
-  "description": "API REST del restaurante Casa Veranda",
+  "description": "API REST de la propuesta local para Mezzanine Rooftop",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

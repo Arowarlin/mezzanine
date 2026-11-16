@@ -51,9 +51,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     () => ({
       settings,
       loading,
-      currency: settings?.currency ?? 'DOP',
-      restaurantName: settings?.restaurant_name ?? 'Casa Veranda',
-      whatsapp: settings?.whatsapp ?? '18095550142',
+      currency: settings?.currency ?? 'USD',
+      restaurantName: settings?.restaurant_name ?? 'Mezzanine',
+      whatsapp: settings?.whatsapp ?? '',
       refresh,
     }),
     [settings, loading, refresh],
