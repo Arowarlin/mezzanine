@@ -15,7 +15,7 @@ Este documento separa lo **verificado** de lo que sigue **pendiente de aprobaci�
 | Correo público | **No disponible** | No se encontró un correo oficial; el sitio oculta el campo en vez de inventarlo |
 | WhatsApp público | **No disponible** | El teléfono publicado es fijo; no se usa WhatsApp en la demo |
 | Horarios | **Pendiente / contradictorio** | El footer oficial dice “Closed Tuesday & Wednesday”; la portada dice “7 days a week, 11am–9pm” |
-| Logo | Verificado | Se usa el archivo original del sitio oficial, sin redibujar ni recolorear |
+| Logo | Verificado | Se usa el archivo original del sitio oficial, sin redibujar; las variantes de transparencia y texto blanco se generan desde el original |
 | Fotografías | **Ilustrativas** | No se copiaron fotografías del restaurante; se usan recursos de Unsplash |
 
 ## 2. Menú de comida (lunch / dinner)

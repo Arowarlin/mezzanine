@@ -40,7 +40,7 @@ Rediseño completo del sitio de **Mezzanine**, el rooftop bar and kitchen de Egg
 
 ```
 client/                 SPA pública + panel
-  public/brand/         Logo original de Mezzanine (blanco y color)
+  public/brand/         Logo original de Mezzanine (variantes clara y oscura)
   src/components/       UI, layout, carrito, admin
   src/context/          ajustes, carrito, autenticación
   src/pages/            páginas públicas y admin
@@ -156,13 +156,14 @@ El servidor sirve `client/dist` y la API desde el mismo origen. Configura `COOKI
 Se usa el **archivo original** de Mezzanine, sin redibujar, recolorear ni deformar:
 
 - `client/public/brand/mezzanine-logo-original.png` — original intocable.
-- `client/public/brand/mezzanine-logo-color.png` — recorte con fondo transparente, para fondos claros.
-- `client/public/brand/mezzanine-logo-white.png` — misma imagen en blanco, para fondos oscuros.
+- `client/public/brand/mezzanine-logo-color.png` — recorte con fondo transparente y bordes suavizados, para fondos claros.
+- `client/public/brand/mezzanine-logo-white.png` — texto en blanco y ondas con su color original, para fondos oscuros.
 - `client/public/brand/mezzanine-waves.png` — recorte de las tres ondas para favicons.
 
 Las variantes se regeneran con:
 
 ```bash
+python -m pip install pillow numpy
 python scripts/make_logo_variants.py
 ```
 

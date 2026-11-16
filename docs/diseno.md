@@ -20,12 +20,12 @@ Reglas obligatorias:
 - Se usa el **archivo original** de Mezzanine, con las tres ondas verde agua, la tipografía original y el texto **DOOR COUNTY**.
 - **No** se redibuja, recolorea, recorta, deforma ni sustituye por un icono o una versión generada.
 - Solo se ajusta el tamaño y la ubicación de forma responsive, manteniendo la proporción (`w-auto object-contain`).
-- Variante blanca generada desde el original (mismos píxeles, solo en blanco) para fondos oscuros: `client/public/brand/mezzanine-logo-white.png`.
-- Variante a color con fondo transparente para fondos claros: `client/public/brand/mezzanine-logo-color.png`.
+- Variante para fondos oscuros: el texto pasa a blanco y las ondas conservan su color original: `client/public/brand/mezzanine-logo-white.png`.
+- Variante a color con fondo transparente y bordes suavizados para fondos claros: `client/public/brand/mezzanine-logo-color.png`.
 - Recorte de las tres ondas para favicons: `client/public/brand/mezzanine-waves.png`.
 - Los favicons se generan desde las ondas, centrados en un lienzo cuadrado transparente.
 - El archivo original `client/public/brand/mezzanine-logo-original.png` no se sobrescribe.
-- Las variantes se regeneran con `python scripts/make_logo_variants.py`.
+- Las variantes se regeneran con `python -m pip install pillow numpy` y `python scripts/make_logo_variants.py`.
 
 ## 3. Paleta
 

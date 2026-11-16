@@ -39,7 +39,7 @@ Rama de trabajo: `mezzanine-local-redesign`, creada desde `main`. El estado ante
 **Hecho**
 
 - Sistema visual: Fraunces + Inter Tight, paleta ink/cream/sand/gold/clay, radios amplios y mucho aire.
-- Header oscuro con el logo original blanco; footer completo; franja de aviso demo.
+- Header oscuro con el logo original en su variante para fondo oscuro; footer completo; franja de aviso demo.
 - Componentes: `.chip`, `.chip-gold`, `.chip-ember`, `.menu-row`, botones y campos actualizados.
 - Estructura de navegación: Home, Eat, Drink, Gallery, About, Contact, con CTA de reservas y carrito demo.
 - Documentación en `docs/diseno.md`, incluidas las reglas del logo.
