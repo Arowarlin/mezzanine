@@ -66,7 +66,7 @@ scripts/                utilidades (instancia MariaDB local)
 ### 1. Instalar
 
 ```bash
-git clone <URL-del-repositorio> mezzanine
+git clone https://github.com/Arowarlin/mezzanine.git
 cd mezzanine
 npm run install:all
 ```
