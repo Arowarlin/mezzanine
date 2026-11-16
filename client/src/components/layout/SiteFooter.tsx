@@ -4,6 +4,8 @@ import { NAV_LINKS } from '../../lib/site'
 import { useSettings } from '../../context/SettingsContext'
 import { Brand } from './Brand'
 
+const CURRENT_YEAR = new Date().getFullYear()
+
 export function SiteFooter() {
   const { settings } = useSettings()
   const phone = settings?.phone ?? '+1 809 555 0142'
@@ -101,7 +103,7 @@ export function SiteFooter() {
 
       <div className="border-t border-cream/10">
         <div className="container-page flex flex-col gap-2 py-6 text-[0.7rem] uppercase tracking-[0.14em] text-cream/35 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Casa Veranda. Todos los derechos reservados.</p>
+          <p>© {CURRENT_YEAR} Casa Veranda. Todos los derechos reservados.</p>
           <p>Santo Domingo · República Dominicana</p>
         </div>
       </div>
