@@ -1,6 +1,6 @@
-# Arquitectura — Mezzanine Rooftop (demo local)
+# Arquitectura — Mezzanine (demo local)
 
-Este proyecto reutiliza la arquitectura de Casa Veranda (React 19 + Express 5 + MariaDB) y la adapta a una propuesta local para Mezzanine. No es el sitio oficial y no está conectado a producción.
+Este proyecto es una propuesta local para Mezzanine, construida con React 19 + Express 5 + MariaDB. No es el sitio oficial y no está conectado a producción.
 
 ## 1. Capas
 
@@ -36,6 +36,10 @@ docs/    arquitectura, diseño, fases y datos pendientes
 | nueva `career_openings` | id, title, description, employment_type, sort_order, is_active | Página de empleos editable |
 
 Todas las columnas usan `ADD COLUMN IF NOT EXISTS` para poder re-ejecutar la migración sin daño. La migración se registra en `schema_migrations`.
+
+### Limpieza de marca (003)
+
+`server/migrations/003_cleanup_branding.sql` sustituye cualquier resto de la marca anterior en ajustes, catálogo, galería, empleos, usuarios, clientes, pedidos y reservas. Se ejecutó manualmente contra MariaDB 3307 y es idempotente.
 
 ### Reglas de contenido
 

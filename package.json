@@ -1,8 +1,8 @@
 {
-  "name": "mezzanine-rooftop-demo",
+  "name": "mezzanine-demo",
   "version": "0.1.0",
   "private": true,
-  "description": "Propuesta local de rediseño para Mezzanine Rooftop (Egg Harbor, WI): sitio público, reservas y pedidos demo, panel administrativo.",
+  "description": "Propuesta local de rediseño para Mezzanine (Egg Harbor, WI): sitio público, reservas y pedidos demo, panel administrativo.",
   "scripts": {
     "install:all": "npm install && npm --prefix server install && npm --prefix client install",
     "db:start": "node scripts/db.mjs start",

@@ -1,6 +1,6 @@
-# Bitácora de fases — rediseño local de Mezzanine Rooftop
+# Bitácora de fases — rediseño local de Mezzanine
 
-Rama de trabajo: `mezzanine-local-redesign`, creada desde `main` (Casa Veranda). El estado original queda disponible en `main` y en el commit de referencia.
+Rama de trabajo: `mezzanine-local-redesign`, creada desde `main`. El estado anterior queda disponible en `main` y en el tag de referencia.
 
 ## Fase 1 — Auditoría del proyecto existente
 
@@ -48,8 +48,12 @@ Rama de trabajo: `mezzanine-local-redesign`, creada desde `main` (Casa Veranda).
 
 - `client/src/index.css`
 - `client/index.html`
+- `client/public/brand/mezzanine-logo-original.png`
 - `client/public/brand/mezzanine-logo-white.png`
-- `client/public/brand/mezzanine-logo-color.jpg`
+- `client/public/brand/mezzanine-logo-color.png`
+- `client/public/brand/mezzanine-waves.png`
+- `client/public/favicon-16.png`, `favicon-32.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`
+- `scripts/make_logo_variants.py`
 - `client/public/robots.txt`, `client/public/sitemap.xml`
 - `docs/diseno.md`
 

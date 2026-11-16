@@ -1,4 +1,4 @@
--- 001_init.sql — esquema inicial de Casa Veranda
+-- 001_init.sql — esquema inicial del proyecto
 -- Dinero en centavos enteros. Fechas DATE/DATETIME, sin zona horaria en la base.
 
 CREATE TABLE IF NOT EXISTS users (

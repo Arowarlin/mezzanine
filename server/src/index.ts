@@ -8,7 +8,7 @@ async function main() {
 
   const app = createApp();
   const server: Server = app.listen(env.PORT, () => {
-    console.log(`API Casa Veranda escuchando en http://localhost:${env.PORT}`);
+    console.log(`API Mezzanine lista en http://localhost:${env.PORT}`);
     console.log(`Entorno: ${env.NODE_ENV} · Base de datos: ${env.DB_NAME}@${env.DB_HOST}:${env.DB_PORT}`);
   });
 

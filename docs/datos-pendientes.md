@@ -1,4 +1,4 @@
-# Datos pendientes de confirmación — Mezzanine Rooftop
+# Datos pendientes de confirmación — Mezzanine
 
 Este documento separa lo **verificado** de lo que sigue **pendiente de aprobación** por el restaurante. La regla del proyecto es simple: si un dato no se pudo verificar, la interfaz lo marca como pendiente y no se presenta como actual.
 

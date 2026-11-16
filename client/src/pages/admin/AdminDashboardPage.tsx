@@ -92,7 +92,7 @@ export function AdminDashboardPage() {
       <PageHeader
         eyebrow="Resumen"
         title="Dashboard"
-        description="Lo que está pasando hoy en la casa, de un vistazo."
+        description="Lo que está pasando hoy en Mezzanine, de un vistazo."
         actions={
           <button type="button" onClick={load} className="btn-ghost px-4 py-2 text-[0.68rem] text-forest">
             Actualizar

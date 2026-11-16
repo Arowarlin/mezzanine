@@ -19,7 +19,7 @@ const schema = z.object({
   UPLOAD_MAX_MB: z.coerce.number().positive().default(5),
 
   ADMIN_NAME: z.string().default('Administrador'),
-  ADMIN_EMAIL: z.string().email().default('admin@casaveranda.do'),
+  ADMIN_EMAIL: z.string().email().default('admin@mezzanine.local'),
   ADMIN_PASSWORD: z.string().min(8, 'ADMIN_PASSWORD debe tener al menos 8 caracteres'),
 });
 

@@ -1,4 +1,4 @@
--- 002_mezzanine.sql — contenido y estructura para la propuesta Mezzanine Rooftop
+-- 002_mezzanine.sql — contenido y estructura para la propuesta Mezzanine
 -- Todo el contenido sembrado con este esquema es de demostración local (is_demo = 1).
 -- MariaDB 10.4 admite ADD COLUMN IF NOT EXISTS; así la migración es re-ejecutable sin daño.
 

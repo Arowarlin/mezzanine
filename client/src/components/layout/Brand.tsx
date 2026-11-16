@@ -8,12 +8,14 @@ type BrandProps = {
 /**
  * Logo original de Mezzanine (archivo oficial proporcionado).
  * No se redibuja, recolorea ni recorta: solo se ajusta su tamaño.
- * - light: versión blanca horizontal para fondos oscuros.
- * - dark: versión a color (lockup con icono) para fondos claros.
+ * - light: versión blanca generada desde el original, para fondos oscuros.
+ * - dark: versión a color con fondo transparente, para fondos claros.
+ *
+ * Las variantes se generan con `python scripts/make_logo_variants.py`.
  */
 const LOGOS = {
-  light: { src: '/brand/mezzanine-logo-white.png', width: 750, height: 204 },
-  dark: { src: '/brand/mezzanine-logo-color.jpg', width: 750, height: 422 },
+  light: { src: '/brand/mezzanine-logo-white.png', width: 571, height: 335 },
+  dark: { src: '/brand/mezzanine-logo-color.png', width: 571, height: 335 },
 }
 
 export function Brand({ light = false, compact = false }: BrandProps) {
@@ -26,7 +28,7 @@ export function Brand({ light = false, compact = false }: BrandProps) {
         alt="Mezzanine — Door County"
         width={logo.width}
         height={logo.height}
-        className={`w-auto object-contain ${compact ? 'h-8 sm:h-9' : 'h-11 sm:h-12'}`}
+        className={`w-auto object-contain ${compact ? 'h-14 sm:h-16' : 'h-20'}`}
         decoding="async"
       />
     </Link>

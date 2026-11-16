@@ -1,4 +1,4 @@
-# Sistema de diseño — Mezzanine Rooftop (propuesta local)
+# Sistema de diseño — Mezzanine (propuesta local)
 
 ## 1. Dirección creativa
 
@@ -20,10 +20,12 @@ Reglas obligatorias:
 - Se usa el **archivo original** de Mezzanine, con las tres ondas verde agua, la tipografía original y el texto **DOOR COUNTY**.
 - **No** se redibuja, recolorea, recorta, deforma ni sustituye por un icono o una versión generada.
 - Solo se ajusta el tamaño y la ubicación de forma responsive, manteniendo la proporción (`w-auto object-contain`).
-- Variante blanca horizontal para fondos oscuros: `client/public/brand/mezzanine-logo-white.png`.
-- Variante a color para fondos claros: `client/public/brand/mezzanine-logo-color.jpg`.
-- El favicon usa el mismo logo a color, no un símbolo alternativo.
-- Los archivos se descargaron del sitio oficial el 16/11/2026 y se usan sin modificación. Si el restaurante entrega un master con más resolución, se reemplazan conservando el mismo nombre y proporción.
+- Variante blanca generada desde el original (mismos píxeles, solo en blanco) para fondos oscuros: `client/public/brand/mezzanine-logo-white.png`.
+- Variante a color con fondo transparente para fondos claros: `client/public/brand/mezzanine-logo-color.png`.
+- Recorte de las tres ondas para favicons: `client/public/brand/mezzanine-waves.png`.
+- Los favicons se generan desde las ondas, centrados en un lienzo cuadrado transparente.
+- El archivo original `client/public/brand/mezzanine-logo-original.png` no se sobrescribe.
+- Las variantes se regeneran con `python scripts/make_logo_variants.py`.
 
 ## 3. Paleta
 

@@ -1,5 +1,5 @@
 /**
- * Datos de marca por defecto para la propuesta local de Mezzanine Rooftop.
+ * Datos de marca por defecto para la propuesta local de Mezzanine.
  * La fuente de verdad en ejecucion es la tabla `settings`; esto alimenta el seed
  * y sirve de respaldo si falta una clave.
  *

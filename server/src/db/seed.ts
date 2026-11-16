@@ -5,7 +5,7 @@ import { env } from '../config/env';
 import { restaurantDefaults } from '../config/restaurant';
 
 /**
- * Seed de la propuesta local de Mezzanine Rooftop.
+ * Seed de la propuesta local de Mezzanine.
  *
  * Reglas de contenido:
  *  - Solo se siembran platos mencionados en listados públicos (Restaurantji,
@@ -660,7 +660,7 @@ async function seedCareers() {
 }
 
 async function main() {
-  console.log('Sembrando datos de Mezzanine Rooftop (demo local)...');
+  console.log('Sembrando datos de Mezzanine (demo local)...');
   await seedSettings();
   await seedAdmin();
   await seedMenu();

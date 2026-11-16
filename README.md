@@ -1,6 +1,6 @@
-# Mezzanine Rooftop — propuesta local de rediseño
+# Mezzanine — propuesta local de rediseño
 
-Rediseño completo del sitio de **Mezzanine**, el rooftop bar and kitchen de Egg Harbor, Wisconsin. Es una **demostración local no oficial**, construida sobre la arquitectura existente de Casa Veranda (React 19 + Express 5 + MariaDB) y preparada para presentarse al propietario o gerente del restaurante.
+Rediseño completo del sitio de **Mezzanine**, el rooftop bar and kitchen de Egg Harbor, Wisconsin. Es una **demostración local no oficial**, preparada para presentarse al propietario o gerente del restaurante.
 
 > **Importante:** no es el sitio oficial, no está afiliado a Mezzanine y no procesa reservas, pedidos, pagos, correos ni mensajes reales. Todo el contenido no verificado está marcado como pendiente.
 
@@ -65,8 +65,8 @@ scripts/                utilidades (instancia MariaDB local)
 ### 1. Instalar
 
 ```bash
-git clone https://github.com/Arowarlin/casa-veranda.git
-cd casa-veranda
+git clone <URL-del-repositorio> mezzanine
+cd mezzanine
 npm run install:all
 ```
 
@@ -155,10 +155,18 @@ El servidor sirve `client/dist` y la API desde el mismo origen. Configura `COOKI
 
 Se usa el **archivo original** de Mezzanine, sin redibujar, recolorear ni deformar:
 
-- `client/public/brand/mezzanine-logo-white.png` — fondos oscuros.
-- `client/public/brand/mezzanine-logo-color.jpg` — fondos claros.
+- `client/public/brand/mezzanine-logo-original.png` — original intocable.
+- `client/public/brand/mezzanine-logo-color.png` — recorte con fondo transparente, para fondos claros.
+- `client/public/brand/mezzanine-logo-white.png` — misma imagen en blanco, para fondos oscuros.
+- `client/public/brand/mezzanine-waves.png` — recorte de las tres ondas para favicons.
 
-Solo se ajusta su tamaño y ubicación de forma responsive.
+Las variantes se regeneran con:
+
+```bash
+python scripts/make_logo_variants.py
+```
+
+Solo se ajusta el tamaño y la ubicación de forma responsive, manteniendo la proporción.
 
 ## Seguridad
 

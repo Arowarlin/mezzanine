@@ -425,7 +425,7 @@ export function AdminProductsPage() {
                 value={form.name}
                 onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
                 className="field"
-                placeholder="Chivo guisado de la casa"
+                placeholder="Pan Fried Whitefish"
                 maxLength={160}
                 required
               />
@@ -530,7 +530,7 @@ export function AdminProductsPage() {
             </div>
             <div>
               <label htmlFor="product-origin" className="label">
-                Origen / casa
+                Origen / productor
               </label>
               <input
                 id="product-origin"
