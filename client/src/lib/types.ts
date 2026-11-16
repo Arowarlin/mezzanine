@@ -153,7 +153,17 @@ export type AdminCategory = Category & {
   productCount?: number
 }
 
-export type AdminProduct = Product & {
+export type AdminProduct = {
+  id: number
+  categoryId: number
+  categoryName: string
+  name: string
+  slug: string
+  description: string | null
+  priceCents: number
+  imageUrl: string | null
+  isFeatured: boolean
+  isAvailable: boolean
   sortOrder: number
 }
 

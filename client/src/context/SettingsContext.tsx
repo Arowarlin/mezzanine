@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import { api } from '../lib/api'
 import type { Settings } from '../lib/types'
 
@@ -8,6 +16,7 @@ type SettingsContextValue = {
   currency: string
   restaurantName: string
   whatsapp: string
+  refresh: () => Promise<void>
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null)
@@ -15,6 +24,11 @@ const SettingsContext = createContext<SettingsContextValue | null>(null)
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const refresh = useCallback(async () => {
+    const data = await api<{ settings: Settings }>('/api/public/settings')
+    setSettings(data.settings)
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -40,8 +54,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       currency: settings?.currency ?? 'DOP',
       restaurantName: settings?.restaurant_name ?? 'Casa Veranda',
       whatsapp: settings?.whatsapp ?? '18095550142',
+      refresh,
     }),
-    [settings, loading],
+    [settings, loading, refresh],
   )
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>
