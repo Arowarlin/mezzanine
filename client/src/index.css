@@ -1,0 +1,205 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #101d19;
+  --color-forest: #1b3a2d;
+  --color-moss: #2f5745;
+  --color-cream: #f7f2e8;
+  --color-sand: #e8dcc8;
+  --color-gold: #c19a5b;
+  --color-clay: #a04b33;
+  --color-line: #ded2bd;
+
+  --shadow-soft: 0 24px 60px -30px rgba(16, 29, 25, 0.45);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream font-sans text-ink antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    @apply bg-gold/35 text-ink;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-medium tracking-tight;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12;
+  }
+
+  .btn,
+  .btn-primary,
+  .btn-gold,
+  .btn-ghost,
+  .btn-light {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.8rem] font-bold uppercase tracking-[0.14em] transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-forest text-cream shadow-[0_12px_30px_-18px_rgba(16,29,25,0.9)] hover:-translate-y-0.5 hover:bg-moss;
+  }
+
+  .btn-gold {
+    @apply bg-gold text-ink hover:-translate-y-0.5 hover:bg-[#d0a96a];
+  }
+
+  .btn-ghost {
+    @apply border border-current/25 bg-transparent text-current hover:border-current/60;
+  }
+
+  .btn-light {
+    @apply bg-cream text-ink hover:-translate-y-0.5 hover:bg-white;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-white/75 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink/35 focus:border-gold focus:bg-white;
+  }
+
+  .label {
+    @apply mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-ink/55;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line/70 bg-white/65;
+  }
+
+  .eyebrow {
+    @apply text-[0.7rem] font-bold uppercase tracking-[0.3em] text-gold;
+  }
+
+  .link-underline {
+    @apply relative inline-block after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full;
+  }
+
+  .admin-table {
+    @apply w-full min-w-[640px] border-collapse text-left text-sm;
+  }
+
+  .admin-table th {
+    @apply border-b border-line/70 px-4 py-3 text-[0.66rem] font-bold uppercase tracking-[0.14em] text-ink/50;
+  }
+
+  .admin-table td {
+    @apply border-b border-line/40 px-4 py-3 align-middle;
+  }
+
+  .admin-table tbody tr {
+    @apply transition-colors hover:bg-sand/25;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slow-zoom {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+}
+
+.reveal.is-visible {
+  animation: fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+.hero-zoom {
+  animation: slow-zoom 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.drawer-enter {
+  animation: slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal,
+  .reveal.is-visible,
+  .animate-fade-in,
+  .hero-zoom,
+  .drawer-enter {
+    animation: none;
+    opacity: 1;
+  }
+}
