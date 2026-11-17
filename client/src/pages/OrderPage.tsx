@@ -41,7 +41,7 @@ export function OrderPage() {
     try {
       const data = await api<OrderResponse>('/api/public/orders', {
         method: 'POST',
-        body: JSON.stringify({
+        body: {
           customer: { name: name.trim(), phone: phone.trim(), email: email.trim() },
           type: 'pickup',
           notes: notes.trim(),
@@ -50,7 +50,7 @@ export function OrderPage() {
             quantity: item.quantity,
             notes: item.notes.trim(),
           })),
-        }),
+        },
       })
       setResult(data.order)
       clear()
@@ -88,8 +88,8 @@ export function OrderPage() {
               · pickup.
             </p>
             <div className="mt-5 rounded-2xl border border-gold/40 bg-gold/10 p-4 text-xs leading-relaxed text-ink/70">
-              <strong className="font-semibold">Demo only.</strong> This order exists only in the local demo
-              database. No ticket was printed, no message was sent, and no payment was processed.
+              <strong className="font-semibold">Demo only.</strong> This order exists only in this demo. No ticket
+              was printed, no message was sent, and no payment was processed.
             </div>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link to="/eat" className="btn-primary">

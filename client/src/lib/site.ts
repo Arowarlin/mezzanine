@@ -67,4 +67,4 @@ export const HOUSE_NOTES = [
 export const DEMO_LABEL = 'Unofficial redesign proposal'
 
 export const DEMO_SHORT =
-  'Local demo only — no real reservations, orders, payments, or emails.'
+  'Demo only — no real reservations, orders, payments, or emails.'

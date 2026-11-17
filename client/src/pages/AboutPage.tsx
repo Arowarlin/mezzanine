@@ -140,7 +140,7 @@ export function AboutPage() {
             <p className="mt-5 flex items-start gap-2 text-xs leading-relaxed text-cream/35">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               {settings?.demo_notice ??
-                'Unofficial redesign proposal — local demo only. No real reservations, orders, payments, or emails are processed.'}
+                'Unofficial redesign proposal — demo only. No real reservations, orders, payments, or emails are processed.'}
             </p>
           </div>
         </div>

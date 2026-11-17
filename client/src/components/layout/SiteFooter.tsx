@@ -104,7 +104,7 @@ export function SiteFooter() {
         </div>
         <div className="container-page pb-8">
           <p className="max-w-4xl text-[0.66rem] leading-relaxed text-cream/25">
-            This is a local demonstration built for review. It is not affiliated with or endorsed by Mezzanine.
+            This is a demonstration built for review. It is not affiliated with or endorsed by Mezzanine.
             Food and drink menus follow the restaurant's published 2026 menus. No reservations, orders, payments,
             or emails are processed. Photos come from @mezzaninerooftop; other dish images are illustrations.
           </p>

@@ -1,4 +1,5 @@
 const BASE = import.meta.env.VITE_API_URL ?? ''
+const STATIC_DEMO = import.meta.env.VITE_STATIC_DEMO === 'true'
 
 export class ApiError extends Error {
   status: number
@@ -17,6 +18,11 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
 }
 
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  if (STATIC_DEMO) {
+    const { staticApi } = await import('./static-api')
+    return staticApi<T>(path, options)
+  }
+
   const { body, headers, ...rest } = options
   const isFormData = body instanceof FormData
 

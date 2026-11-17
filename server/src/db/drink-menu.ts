@@ -135,7 +135,7 @@ export const drinkCategories: DrinkCategorySeed[] = [
     slug: 'beer-cider',
     kind: 'drink',
     description: 'Packaged beer and cider from Wisconsin and the Midwest.',
-    image: art('category-beer'),
+    image: menuImage('beer-ipa'),
     sort: 7,
     products: beers.map(([name, style, brewery, place, image], index) => ({
       name,
@@ -154,7 +154,7 @@ export const drinkCategories: DrinkCategorySeed[] = [
     slug: 'wine',
     kind: 'drink',
     description: 'Rosé & bubbly, white, and red.',
-    image: art('category-wine'),
+    image: menuImage('wine-rose'),
     sort: 8,
     products: wines.map(([name, style, place], index) => ({
       name,

@@ -34,7 +34,7 @@ export const restaurantDefaults = {
     'Closed Tuesday & Wednesday · Thursday–Monday, 12–8pm. The 2026 season ended October 31; confirm reopening for 2027.',
   demo_mode: 'true',
   demo_notice:
-    'Unofficial redesign proposal — local demo only. No real reservations, orders, payments, or emails are processed.',
+    'Unofficial redesign proposal — demo only. No real reservations, orders, payments, or emails are processed.',
   hero_title: 'A rooftop table above Egg Harbor.',
   hero_subtitle:
     'Cocktails, wine, and a short kitchen menu — served upstairs, under the sky.',

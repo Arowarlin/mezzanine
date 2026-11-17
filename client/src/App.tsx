@@ -27,6 +27,7 @@ import { AdminReservationsPage } from './pages/admin/AdminReservationsPage'
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage'
 
 export default function App() {
+  const staticDemo = import.meta.env.VITE_STATIC_DEMO === 'true'
   return (
     <SettingsProvider>
       <AuthProvider>
@@ -54,26 +55,32 @@ export default function App() {
               <Route path="*" element={<NotFoundPage />} />
             </Route>
 
-            <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route
-              path="/admin"
-              element={
-                <RequireAuth>
-                  <AdminLayout />
-                </RequireAuth>
-              }
-            >
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="pedidos" element={<AdminOrdersPage />} />
-              <Route path="reservas" element={<AdminReservationsPage />} />
-              <Route path="productos" element={<AdminProductsPage />} />
-              <Route path="categorias" element={<AdminCategoriesPage />} />
-              <Route path="galeria" element={<AdminGalleryPage />} />
-              <Route path="empleos" element={<AdminCareersPage />} />
-              <Route path="clientes" element={<AdminCustomersPage />} />
-              <Route path="ajustes" element={<AdminSettingsPage />} />
-              <Route path="*" element={<Navigate to="/admin" replace />} />
-            </Route>
+            {staticDemo ? <Route path="/admin/*" element={<Navigate to="/" replace />} /> : null}
+
+            {!staticDemo ? (
+              <>
+                <Route path="/admin/login" element={<AdminLoginPage />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <RequireAuth>
+                      <AdminLayout />
+                    </RequireAuth>
+                  }
+                >
+                  <Route index element={<AdminDashboardPage />} />
+                  <Route path="pedidos" element={<AdminOrdersPage />} />
+                  <Route path="reservas" element={<AdminReservationsPage />} />
+                  <Route path="productos" element={<AdminProductsPage />} />
+                  <Route path="categorias" element={<AdminCategoriesPage />} />
+                  <Route path="galeria" element={<AdminGalleryPage />} />
+                  <Route path="empleos" element={<AdminCareersPage />} />
+                  <Route path="clientes" element={<AdminCustomersPage />} />
+                  <Route path="ajustes" element={<AdminSettingsPage />} />
+                  <Route path="*" element={<Navigate to="/admin" replace />} />
+                </Route>
+              </>
+            ) : null}
           </Routes>
         </CartProvider>
       </AuthProvider>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { assetUrl } from '../../lib/assets'
 
 type BrandProps = {
   light?: boolean
@@ -24,7 +25,7 @@ export function Brand({ light = false, compact = false }: BrandProps) {
   return (
     <Link to="/" className="inline-flex shrink-0 items-center" aria-label="Mezzanine — home">
       <img
-        src={logo.src}
+        src={assetUrl(logo.src) ?? logo.src}
         alt="Mezzanine — Door County"
         width={logo.width}
         height={logo.height}

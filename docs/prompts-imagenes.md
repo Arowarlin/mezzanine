@@ -1,6 +1,6 @@
 # Prompts para imágenes generadas con IA — Mezzanine
 
-Imágenes **provisionales** para los platos y bebidas que todavía no tienen foto real. Se usan hasta tener fotos del restaurante.
+Imágenes **provisionales** para los platos y bebidas que todavía no tienen foto real. Ahora mismo esos huecos están cubiertos con fotos de Unsplash (ver `docs/creditos-fotos.md`). Estos prompts sirven si prefieres generar imágenes con IA: guarda cada una con el mismo nombre y sustituirá a la de Unsplash.
 
 Total: **48 imágenes**.
 

@@ -174,6 +174,25 @@ Rama de trabajo: `mezzanine-local-redesign`, creada desde `main`. El estado ante
 - QA de 9 páginas públicas en 7 anchos (320–1440 px): sin desbordamiento, imágenes rotas ni excepciones.
 - Admin verificado con 76 productos y rutas de imagen relativas.
 
+## Fase 10 — Demo estática en GitHub Pages
+
+**Hecho**
+
+- Repositorio renombrado a `Arowarlin/mezzanine`.
+- `main` actualizado con el proyecto completo; el estado original queda en el tag `casa-veranda-reference`.
+- Modo estático `VITE_STATIC_DEMO=true` con `HashRouter` y base `/mezzanine/`.
+- API simulada en el navegador con `client/src/data/static-demo.json`.
+- Reservas y pedidos demo funcionan sin backend; el panel admin redirige al inicio.
+- Workflow `.github/workflows/deploy-pages.yml` para compilar y publicar en GitHub Pages.
+- URL pública: <https://arowarlin.github.io/mezzanine/>
+
+**Pruebas**
+
+- Build normal y build `pages` ✅.
+- QA de la build estática en servidor local: rutas, imágenes, carrito, pedido y reserva ✅.
+- Sin desbordamiento ni imágenes rotas en desktop y móvil.
+- La API real también se verificó con pedido y reserva desde la UI.
+
 ## Pendiente antes de publicar
 
 1. Aprobación del restaurante y de todos los datos marcados como pendientes.

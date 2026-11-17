@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { api, errorMessage } from '../lib/api'
+import { assetUrl } from '../lib/assets'
 import type { GalleryImage } from '../lib/types'
 import { SmartImage } from '../components/ui/SmartImage'
 import { PageLoader } from '../components/ui/Spinner'
@@ -169,7 +170,7 @@ export function GalleryPage() {
               <ChevronLeft className="h-5 w-5" />
             </button>
             <img
-              src={activeImage.url}
+              src={assetUrl(activeImage.url) ?? activeImage.url}
               alt={activeImage.title ?? 'Mezzanine'}
               className="max-h-full max-w-full rounded-xl object-contain"
             />

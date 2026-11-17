@@ -41,7 +41,7 @@ export function SiteHeader() {
         <div className="container-page flex h-8 items-center justify-between gap-4 text-[0.6rem] font-medium uppercase tracking-[0.18em]">
           <span className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-[#4fb3a8]" />
-            Unofficial redesign proposal · local demo
+            Unofficial redesign proposal · {import.meta.env.VITE_STATIC_DEMO === 'true' ? 'static demo' : 'local demo'}
           </span>
           <a
             href={`tel:${phone.replace(/[^\d+]/g, '')}`}

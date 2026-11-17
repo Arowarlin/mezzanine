@@ -39,8 +39,6 @@ export type FoodCategorySeed = {
   products: FoodProductSeed[];
 };
 
-const art = (name: string) => menuImage(name);
-
 /** Fotos reales (Instagram @mezzaninerooftop) para los platos que aparecen en ellas. */
 const PHOTOS: Record<string, string> = {
   ceviche: '/photos/food-whitefish-ceviche-800.jpg',
@@ -179,7 +177,7 @@ export const foodCategories: FoodCategorySeed[] = [
     kind: 'food',
     description:
       'Sandwiches served w/ fresh watermelon or fries. Sub chili-lime fries w/ ancho-garlic aioli for $2.',
-    image: art('category-lunch'),
+    image: menuImage('burger'),
     sort: 2,
     products: toProducts('lunch', lunchPlates, ['Whitefish Tacos', 'Mezzanine Burger*']),
   },
@@ -197,7 +195,7 @@ export const foodCategories: FoodCategorySeed[] = [
     slug: 'soup-salads',
     kind: 'food',
     description: 'Field greens, Door County cherries and a daily soup.',
-    image: art('category-salads'),
+    image: menuImage('cherry-salad'),
     sort: 4,
     products: toProducts('lunch', lunchSoupSalads),
   },
@@ -206,7 +204,7 @@ export const foodCategories: FoodCategorySeed[] = [
     slug: 'desserts',
     kind: 'food',
     description: 'A sweet finish, if you are staying a little longer.',
-    image: art('category-desserts'),
+    image: menuImage('cherry-crisp'),
     sort: 5,
     products: [...toProducts('lunch', lunchDesserts), ...toProducts('dinner', dinnerDesserts)],
   },

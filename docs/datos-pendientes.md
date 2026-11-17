@@ -14,7 +14,7 @@ Este documento separa lo **verificado** de lo que sigue **pendiente de aprobaci�
 | Sitio oficial | Verificado | <https://www.mezzaninerooftop.com/> |
 | Correo público | **No disponible** | No se encontró un correo oficial; el sitio oculta el campo en vez de inventarlo |
 | WhatsApp público | **No disponible** | El teléfono publicado es fijo; no se usa WhatsApp en la demo |
-| Horarios | **Verificado (Instagram)** | Cerrado martes y miércoles; jueves a lunes, 12–8pm. La temporada 2026 terminó el 31 de octubre |
+| Horarios | **Pendiente / contradictorio** | El footer oficial dice “Closed Tuesday & Wednesday”; la portada dice “7 days a week, 11am–9pm” |
 | Logo | Verificado | Se usa el archivo original del sitio oficial, sin redibujar; las variantes de transparencia y texto blanco se generan desde el original |
 | Fotografías | **Reales (Instagram)** | 10 fotos de @mezzaninerooftop (junio–octubre 2026) en `client/public/photos/`; los platos sin foto usan ilustraciones propias |
 
@@ -27,7 +27,7 @@ Este documento separa lo **verificado** de lo que sigue **pendiente de aprobaci�
 - Los extras se conservan en la descripción: "add 5 panko crusted shrimp 8", "add nueske's bacon 2.5", "sub chili-lime fries w/ ancho-garlic aioli for $2", "a la mode w/ cinnamon ice cream 2.5".
 - El asterisco (\*) del nombre remite al aviso de alimentos crudos o poco cocidos, que se muestra al pie del menú junto con "Menu prices reflect discounted cash payment price" y "Late night menu available after 9pm".
 - La sopa no tiene nombre en el menú (es la sopa del día): se publica como *Soup (Cup)* $6 y *Soup (Bowl)* $9.
-- Las imágenes de los platos combinan **fotos reales de @mezzaninerooftop** (ceviche, mejillones y atún) e **ilustraciones propias** para el resto (`client/public/menu/*.svg`, generadas con `python scripts/make_menu_art.py`). Se reemplazan desde el panel admin o sustituyendo el archivo con el mismo nombre.
+- Las imágenes de los platos son **ilustraciones propias** (`client/public/menu/*.svg`, generadas con `python scripts/make_menu_art.py`), no fotos. Se reemplazan desde el panel admin o sustituyendo el archivo con el mismo nombre.
 
 Pendiente: alérgenos, el contenido exacto del late night menu y confirmar que los precios siguen vigentes cuando cambie la temporada.
 
@@ -38,7 +38,7 @@ Pendiente: alérgenos, el contenido exacto del late night menu y confirmar que l
 - 10 cócteles con sus ingredientes, 9 cervezas o sidras con estilo, cervecería y origen, y 14 vinos con varietal y origen.
 - **El sitio oficial no publica precios de bebidas.** Se eliminaron los precios de muestra que había antes: las bebidas se muestran sin precio ("At the bar" / "Ask your server") y no se pueden añadir al pedido demo.
 - Erratas del sitio oficial corregidas: "ew zealand" → New Zealand, "reisling" → Riesling, "monterray" → Monterey, "castillo" → Castilla.
-- Las imágenes de las bebidas en la carta son ilustraciones propias; la portada de Drink usa una foto de Instagram.
+- Las imágenes de bebidas también son ilustraciones propias.
 
 Pendiente: precios, precio por copa o por botella, y formato de la cerveza (la carta oficial dice "Packaged").
 
@@ -63,7 +63,7 @@ Pendiente: precios, precio por copa o por botella, y formato de la cerveza (la c
 
 ## 7. Qué falta antes de una publicación real
 
-1. Confirmar la reapertura 2027 y la vigencia de los horarios.
+1. Confirmar horarios y días de cierre.
 2. Confirmar alérgenos y vigencia de precios de comida.
 3. Obtener precios y formatos de bebidas (no están publicados).
 4. Confirmar correo, WhatsApp y proceso real de reservas/pedidos.
@@ -98,3 +98,6 @@ Pendiente:
 - Confirmar qué cóctel aparece en cada foto, para asignarla a su bebida en la carta.
 - Iniciar sesión en Instagram para revisar las publicaciones más antiguas.
 
+### Fotos de stock provisionales
+
+Los 48 platos y bebidas sin foto propia usan fotos genéricas de Unsplash (licencia gratuita de uso comercial), guardadas en `client/public/photos/menu/`. La lista completa está en `docs/creditos-fotos.md`. No son los platos reales: hay que sustituirlas por fotos propias del restaurante.

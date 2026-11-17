@@ -86,13 +86,13 @@ export function ReservationsPage() {
     try {
       const data = await api<ReservationResponse>('/api/public/reservations', {
         method: 'POST',
-        body: JSON.stringify({
+        body: {
           customer: { name: name.trim(), phone: phone.trim(), email: email.trim() },
           date,
           time,
           partySize,
           notes: notes.trim(),
-        }),
+        },
       })
       setResult(data.reservation)
     } catch (err) {

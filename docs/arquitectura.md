@@ -119,7 +119,27 @@ La interfaz pública está en inglés. Los textos de marca viven en `settings` y
 
 No se implementó el selector en esta fase para no añadir complejidad sin contenido traducido aprobado.
 
-## 9. Decisiones y límites
+## 9. Demo estática para GitHub Pages
+
+La rama `main` publica una versión estática en <https://arowarlin.github.io/mezzanine/>.
+
+- `client/.env.pages` activa `VITE_STATIC_DEMO=true` y `VITE_BASE=/mezzanine/`.
+- `client/src/lib/static-api.ts` simula los endpoints públicos con el JSON exportado.
+- `client/src/data/static-demo.json` se genera con `npm run demo:export` desde la API local.
+- `client/src/lib/assets.ts` prefija las rutas de imágenes con el base path de Pages.
+- `main.tsx` usa `HashRouter` en modo estático para evitar 404 en rutas profundas.
+- El panel admin se redirige al inicio; no hay autenticación ni escrituras reales.
+- `.github/workflows/deploy-pages.yml` compila y despliega en cada push a `main`.
+
+Después de cambiar el menú o las fotos hay que regenerar el JSON y volver a compilar:
+
+```bash
+npm run db:seed
+npm run demo:export
+npm --prefix client run build:pages
+```
+
+## 10. Decisiones y límites
 
 - **Fotografías de @mezzaninerooftop**: se usan fotos públicas de Instagram para ambiente, galería y algunos platos; el resto son ilustraciones SVG propias. Todas se marcan como material de demostración.
 - **No se inventaron platos, recetas ni precios**: ver `docs/datos-pendientes.md`.

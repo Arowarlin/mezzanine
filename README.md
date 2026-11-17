@@ -28,6 +28,24 @@ Rediseño completo del sitio de **Mezzanine**, el rooftop bar and kitchen de Egg
 - Pedidos y reservas demo con email del cliente y marca `is_demo`.
 - Ajustes de marca, contacto, redes, horarios, textos de páginas y modo demo.
 
+## Demo pública en GitHub Pages
+
+La versión estática está publicada en:
+
+**https://arowarlin.github.io/mezzanine/**
+
+Es una copia de exhibición: no tiene backend ni base de datos. Los datos salen de `client/src/data/static-demo.json`, las reservas y los pedidos se simulan en el navegador y el panel administrativo no está disponible. Usa rutas con hash (`/#/eat`, `/#/drink`).
+
+Para actualizarla después de cambiar el menú, las fotos o los ajustes:
+
+```bash
+npm run db:seed
+npm run demo:export
+npm --prefix client run build:pages
+```
+
+El workflow `.github/workflows/deploy-pages.yml` compila y publica automáticamente en cada push a `main`.
+
 ## Stack
 
 | Capa | Tecnología |

@@ -42,3 +42,5 @@ coverage/
 
 # Fotos originales de Instagram (las optimizadas están en client/public/photos)
 _originales-instagram/
+# Descargas originales de Unsplash (las optimizadas están en client/public/photos/menu)
+_descargas-unsplash/

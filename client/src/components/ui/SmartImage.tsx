@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { UtensilsCrossed } from 'lucide-react'
+import { assetUrl } from '../../lib/assets'
 
 type SmartImageProps = {
   src: string | null | undefined
@@ -11,12 +12,13 @@ type SmartImageProps = {
 
 export function SmartImage({ src, alt, className = '', imgClassName = '', eager = false }: SmartImageProps) {
   const [failed, setFailed] = useState(false)
+  const resolved = assetUrl(src)
 
   useEffect(() => {
     setFailed(false)
   }, [src])
 
-  if (!src || failed) {
+  if (!resolved || failed) {
     return (
       <div className={`flex items-center justify-center bg-sand text-forest/40 ${className}`}>
         <UtensilsCrossed className="h-8 w-8" aria-hidden="true" />
@@ -30,7 +32,7 @@ export function SmartImage({ src, alt, className = '', imgClassName = '', eager 
   return (
     <span className={`block ${className}`}>
       <img
-        src={src}
+        src={resolved}
         alt={alt}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
